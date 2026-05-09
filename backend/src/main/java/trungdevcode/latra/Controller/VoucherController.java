@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import trungdevcode.latra.Dto.VoucherRequestDTO;
-import trungdevcode.latra.Entity.Voucher;
+import trungdevcode.latra.entity.Voucher;
 import trungdevcode.latra.Service.VoucherService;
 
 import java.math.BigDecimal;

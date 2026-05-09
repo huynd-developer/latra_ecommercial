@@ -4,37 +4,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import trungdevcode.latra.Dto.EmployeeDTO;
-import trungdevcode.latra.Entity.User;
-import trungdevcode.latra.Repository.UserRepository;
+import trungdevcode.latra.entity.User;
+import trungdevcode.latra.repository.UserRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class EmployeeService {
-    private final UserRepository userRepository;
-
+    public final UserRepository userRepository;
+    // Thêm vào trong EmployeeService.java
     public List<EmployeeDTO> getAllEmployees() {
-        List<User> users = userRepository.findAllEmployeesOnly();
-
-        return users.stream().map(u -> {
-            EmployeeDTO dto = new EmployeeDTO();
-            dto.setId(u.getId());
-            dto.setUsername(u.getUsername());
-            dto.setFullName(u.getFullName());
-            dto.setPhone(u.getPhone());
-            dto.setEmail(u.getEmail());
-            dto.setAddress(u.getAddress());
-            dto.setStatus(u.getStatus() != null ? u.getStatus() : 1);
-
-            Long roleId = userRepository.findRoleIdByUserId(u.getId());
-            dto.setRoleId(roleId);
-
-            return dto;
-        }).collect(Collectors.toList());
+        return userRepository.getAllEmployees(); // Logic xử lý nằm ở đây mới chuẩn!
     }
-
     @Transactional
     public void addEmployee(EmployeeDTO dto) {
         validateEmployeeData(dto, false);

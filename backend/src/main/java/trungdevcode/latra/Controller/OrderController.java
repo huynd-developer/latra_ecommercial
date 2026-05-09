@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import trungdevcode.latra.Dto.CheckoutRequestDTO;
-import trungdevcode.latra.Entity.Order;
 import trungdevcode.latra.Service.OrderService;
 
 @RestController
@@ -16,60 +15,44 @@ public class OrderController {
     private final OrderService orderService;
 
     // ==========================================
-    // API MỚI CHO LUỒNG BÁN HÀNG POS (QUÉT SÚNG) - ĐANG CHẠY TỐT
+    // API MỚI CHO LUỒNG BÁN HÀNG POS (QUÉT SÚNG)
     // ==========================================
     @PostMapping("/checkout-pos")
     public ResponseEntity<?> checkoutPOS(@RequestBody CheckoutRequestDTO request) {
-        try {
-            String result = orderService.checkoutPOS(request);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
+        // 🔥 Bỏ try-catch vì GlobalExceptionHandler sẽ tự hứng lỗi 400
+        String result = orderService.checkoutPOS(request);
+        return ResponseEntity.ok(result);
     }
 
     // ==========================================
     // CÁC API CŨ TẠM THỜI ĐÓNG BĂNG ĐỂ TRÁNH LỖI ĐỎ
-    // (Sau này khôi phục hàm trong Service thì mở lại sau)
     // ==========================================
     /*
     @PostMapping("/checkout/{userId}")
-    public ResponseEntity<?> checkout(@PathVariable Long userId) {
-        try {
-            Order order = orderService.checkout(userId);
-            return ResponseEntity.ok("Đặt hàng thành công! Mã đơn hàng: " + order.getId());
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> checkout(@PathVariable("userId") Long userId) { // 🔥 Fix sẵn lỗi 400
+        Order order = orderService.checkout(userId);
+        return ResponseEntity.ok("Đặt hàng thành công! Mã đơn hàng: " + order.getId());
     }
 
     @GetMapping
     public ResponseEntity<?> getAllOrders(
-            @RequestParam(required = false) String status,
+            // 🔥 Fix sẵn lỗi 400
+            @RequestParam(value = "status", required = false) String status,
             org.springframework.data.domain.Pageable pageable) {
         return ResponseEntity.ok(orderService.getOrders(status, pageable));
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<?> getOrderDetails(@PathVariable Long orderId) {
-        try {
-            return ResponseEntity.ok(orderService.getOrderDetails(orderId));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        }
+    public ResponseEntity<?> getOrderDetails(@PathVariable("orderId") Long orderId) { // 🔥 Fix sẵn lỗi 400
+        return ResponseEntity.ok(orderService.getOrderDetails(orderId));
     }
 
     @PutMapping("/{orderId}/status")
     public ResponseEntity<?> updateStatus(
-            @PathVariable Long orderId,
-            @RequestBody trungdevcode.latra.Dto.DonHangDTO.CapNhatTrangThai request) {
-        try {
-            orderService.updateOrderStatus(orderId, request);
-            return ResponseEntity.ok("Cập nhật trạng thái thành công!");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+            @PathVariable("orderId") Long orderId, // 🔥 Fix sẵn lỗi 400
+            @RequestBody trungdevcode.latra.donHang.dto.DonHangDTO.CapNhatTrangThai request) {
+        orderService.updateOrderStatus(orderId, request);
+        return ResponseEntity.ok("Cập nhật trạng thái thành công!");
     }
     */
 }

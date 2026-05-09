@@ -3,8 +3,8 @@ package trungdevcode.latra.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import trungdevcode.latra.Dto.VoucherRequestDTO;
-import trungdevcode.latra.Entity.Voucher;
-import trungdevcode.latra.Repository.VoucherRepository;
+import trungdevcode.latra.entity.Voucher;
+import trungdevcode.latra.repository.VoucherRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

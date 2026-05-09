@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import trungdevcode.latra.Dto.CustomerDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import trungdevcode.latra.Entity.User;
-import trungdevcode.latra.Repository.UserRepository;
+import trungdevcode.latra.entity.User;
+import trungdevcode.latra.repository.UserRepository;
 import trungdevcode.latra.Service.CustomerService;
 
 import java.util.List;

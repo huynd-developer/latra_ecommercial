@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import trungdevcode.latra.Dto.FlashSaleRequestDTO;
-import trungdevcode.latra.Entity.FlashSale;
+import trungdevcode.latra.entity.FlashSale;
 import trungdevcode.latra.Service.FlashSaleService;
 
 import java.util.List;

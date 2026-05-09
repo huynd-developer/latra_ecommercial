@@ -3,12 +3,12 @@ package trungdevcode.latra.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import trungdevcode.latra.Entity.Cart;
-import trungdevcode.latra.Entity.CartItem;
-import trungdevcode.latra.Entity.ProductVariant; // Đổi từ Product sang ProductVariant
-import trungdevcode.latra.Repository.CartItemRepository;
-import trungdevcode.latra.Repository.CartRepository;
-import trungdevcode.latra.Repository.ProductVariantRepository; // Thêm Repo mới
+import trungdevcode.latra.entity.Cart;
+import trungdevcode.latra.entity.CartItem;
+import trungdevcode.latra.entity.ProductVariant; // Đổi từ Product sang ProductVariant
+import trungdevcode.latra.repository.CartItemRepository;
+import trungdevcode.latra.repository.CartRepository;
+import trungdevcode.latra.repository.ProductVariantRepository; // Thêm Repo mới
 
 import java.util.Optional;
 
@@ -79,7 +79,7 @@ public class CartService {
             return cartRepository.save(cart);
         }
 
-        trungdevcode.latra.Entity.ProductVariant variant = itemToUpdate.getVariant();
+        trungdevcode.latra.entity.ProductVariant variant = itemToUpdate.getVariant();
         if (variant.getStock() < newQuantity) {
             throw new RuntimeException("Kho không đủ! Sản phẩm này chỉ còn " + variant.getStock() + " chiếc.");
         }

@@ -3,10 +3,10 @@ package trungdevcode.latra.Controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import trungdevcode.latra.Entity.Brand;
-import trungdevcode.latra.Entity.Category;
-import trungdevcode.latra.Repository.BrandRepository;
-import trungdevcode.latra.Repository.CategoryRepository;
+import trungdevcode.latra.entity.Brand;
+import trungdevcode.latra.entity.Category;
+import trungdevcode.latra.repository.BrandRepository;
+import trungdevcode.latra.repository.CategoryRepository;
 
 import java.util.List;
 

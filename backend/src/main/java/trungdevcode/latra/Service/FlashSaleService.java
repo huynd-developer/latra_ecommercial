@@ -4,12 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import trungdevcode.latra.Dto.FlashSaleRequestDTO;
-import trungdevcode.latra.Entity.FlashSale;
-import trungdevcode.latra.Entity.FlashSaleItem;
-import trungdevcode.latra.Entity.ProductVariant;
-import trungdevcode.latra.Repository.FlashSaleItemRepository;
-import trungdevcode.latra.Repository.FlashSaleRepository;
-import trungdevcode.latra.Repository.ProductVariantRepository;
+import trungdevcode.latra.entity.FlashSale;
+import trungdevcode.latra.entity.FlashSaleItem;
+import trungdevcode.latra.entity.ProductVariant;
+import trungdevcode.latra.repository.FlashSaleItemRepository;
+import trungdevcode.latra.repository.FlashSaleRepository;
+import trungdevcode.latra.repository.ProductVariantRepository;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;

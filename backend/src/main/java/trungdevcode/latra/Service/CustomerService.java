@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import trungdevcode.latra.Dto.CustomerDTO;
-import trungdevcode.latra.Entity.User;
-import trungdevcode.latra.Repository.UserRepository;
+import trungdevcode.latra.entity.User;
+import trungdevcode.latra.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;

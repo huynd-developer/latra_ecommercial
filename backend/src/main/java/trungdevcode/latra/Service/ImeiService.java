@@ -3,10 +3,10 @@ package trungdevcode.latra.Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import trungdevcode.latra.Entity.Imei;
-import trungdevcode.latra.Entity.ProductVariant;
-import trungdevcode.latra.Repository.ImeiRepository;
-import trungdevcode.latra.Repository.ProductVariantRepository;
+import trungdevcode.latra.entity.Imei;
+import trungdevcode.latra.entity.ProductVariant;
+import trungdevcode.latra.repository.ImeiRepository;
+import trungdevcode.latra.repository.ProductVariantRepository;
 
 import java.util.ArrayList;
 import java.util.HashMap;

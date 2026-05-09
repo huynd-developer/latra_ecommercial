@@ -11,12 +11,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import trungdevcode.latra.Dto.ProductRequestDTO;
 import trungdevcode.latra.Dto.ProductResponseDTO;
-import trungdevcode.latra.Entity.Product;
-import trungdevcode.latra.Entity.ProductImage;
-import trungdevcode.latra.Entity.ProductVariant;
-import trungdevcode.latra.Repository.ProductImageRepository;
-import trungdevcode.latra.Repository.ProductRepository;
-import trungdevcode.latra.Repository.ProductVariantRepository;
+import trungdevcode.latra.entity.Product;
+import trungdevcode.latra.entity.ProductImage;
+import trungdevcode.latra.entity.ProductVariant;
+import trungdevcode.latra.repository.ProductImageRepository;
+import trungdevcode.latra.repository.ProductRepository;
+import trungdevcode.latra.repository.ProductVariantRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.nio.file.Files;

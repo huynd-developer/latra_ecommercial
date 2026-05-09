@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import trungdevcode.latra.Dto.ShiftSummaryDTO;
-import trungdevcode.latra.Repository.OrderRepository;
-import trungdevcode.latra.Repository.UserRepository;
-import trungdevcode.latra.Entity.User;
+import trungdevcode.latra.repository.OrderRepository;
+import trungdevcode.latra.repository.UserRepository;
+import trungdevcode.latra.entity.User;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
