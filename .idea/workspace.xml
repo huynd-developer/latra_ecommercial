@@ -5,128 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="54b316aa-6f0e-4567-9206-b0e474dc3e04" name="Changes" comment="&quot;Update backend cac chuc nang&quot;">
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/donHang/service/Service.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Config/CorsConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Config/CorsConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Config/Demo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Config/Demo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Config/DonHangConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Config/DonHangConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Config/WebConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Config/WebConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/CustomerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/CustomerController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/DashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/DashboardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/DonHangController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/donHang/controller/DonHangController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/EmployeeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/EmployeeController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/FlashSaleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/FlashSaleController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/OrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/OrderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/ProductController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/ReferenceDataController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/ReferenceDataController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/ShiftController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/ShiftController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/VoucherController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/VoucherController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Dto/DonHangDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/donHang/dto/DonHangDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/Brand.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/Brand.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/Cart.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/Cart.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/CartItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/CartItem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/Category.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/Category.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/Demo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/Demo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/FlashSale.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/FlashSale.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/FlashSaleItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/FlashSaleItem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/FlashSaleItemId.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/FlashSaleItemId.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/Imei.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/Imei.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/Order.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/OrderDetail.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/OrderDetail.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/OrderDetailKey.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/OrderDetailKey.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/Product.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/ProductImage.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/ProductImage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/ProductVariant.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/ProductVariant.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/Shipments.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/Shipments.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Entity/Voucher.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/Voucher.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/BrandRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/BrandRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/CartItemRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/CartItemRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/CartRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/CartRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/CategoryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/CategoryRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/Demo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/Demo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/FlashSaleItemRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/FlashSaleItemRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/FlashSaleRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/FlashSaleRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/ImeiRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/ImeiRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/OrderDetailRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/OrderDetailRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/OrderRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/OrderRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/ProductImageRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/ProductImageRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/ProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/ProductRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/ProductVariantRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/ProductVariantRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Repository/VoucherRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/VoucherRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/CartService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/CartService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/CustomerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/CustomerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/EmployeeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/EmployeeService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/FlashSaleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/FlashSaleService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/ImeiService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/ImeiService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/OrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/OrderService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/ProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/ProductService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/VoucherService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Service/VoucherService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend" beforeDir="false" afterPath="$PROJECT_DIR$/frontend" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/.gitattributes" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.vite/deps/_metadata.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.vite/deps/bootstrap_dist_js_bootstrap__bundle__min__js.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.vite/deps/bootstrap_dist_js_bootstrap__bundle__min__js.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.vite/deps/chunk-BUSYA2B4.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.vite/deps/chunk-BUSYA2B4.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.vite/deps/chunk-C6I6ZPET.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.vite/deps/chunk-C6I6ZPET.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.vite/deps/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.vite/deps/vue-router.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.vite/deps/vue-router.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.vite/deps/vue.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.vite/deps/vue.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/.vscode/extensions.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/env.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/package-lock.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/public/favicon.ico" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/App.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/assets/logo.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/admin/layout/TopHeader.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/admin/managers/CustomerManager.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/admin/managers/DashboardOverview.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/admin/managers/EmployeeManager.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/admin/managers/FlashSaleManager.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/admin/managers/GenericManager.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/admin/managers/ImeiManager.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/admin/managers/OrderManager.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/admin/managers/PosManager.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/admin/managers/ProductManager.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/admin/managers/VoucherManager.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/category/FilterSidebar.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/category/ProductCard.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/checkout/CheckoutForm.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/checkout/OrderSummary.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/checkout/PaymentMethod.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/home/FeatureSection.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/home/HeroBanner.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/layout/CartDrawer.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/layout/Footer.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/layout/Header.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/product/ImageGallery.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/product/ProductInfo.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/components/product/ReviewSection.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/data/db.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/main.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/router/index.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/services/api.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/store/cartStore.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/views/AdminView.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/views/CategoryView.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/views/CheckoutView.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/views/HomeView.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/views/ProductDetailView.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/src/views/SuccessView.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/tsconfig.app.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/tsconfig.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/tsconfig.node.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/datn-sd37/vite.config.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/donHang/controller/DonHangController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/donHang/controller/DonHangController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -157,7 +38,7 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/trungcode-dev/LATRA.git&quot;,
+    &quot;url&quot;: &quot;https://github.com/huynd-developer/latra_ecommercial.git&quot;,
     &quot;accountId&quot;: &quot;279d47c4-56cd-4858-85d6-4e1ce248d7eb&quot;
   }
 }</component>
@@ -195,7 +76,7 @@
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "reference.projectsettings.compiler.annotationProcessors",
+    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -290,7 +171,9 @@
       <workItem from="1778251352339" duration="3000" />
       <workItem from="1778251365194" duration="8000" />
       <workItem from="1778251391778" duration="6774000" />
-      <workItem from="1778294861022" duration="3676000" />
+      <workItem from="1778294861022" duration="4454000" />
+      <workItem from="1778402186344" duration="1876000" />
+      <workItem from="1778518613269" duration="717000" />
     </task>
     <task id="LOCAL-00001" summary="&quot;Hoàn thiện API Giỏ hàng và Checkout (Trừ kho chuẩn) - Done 100%&quot;">
       <option name="closed" value="true" />

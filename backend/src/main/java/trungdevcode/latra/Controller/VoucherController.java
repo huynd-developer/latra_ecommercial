@@ -1,7 +1,7 @@
 package trungdevcode.latra.Controller;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,11 +14,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/vouchers/admin")
-@CrossOrigin(origins = "http://localhost:5173") // 🔥 Nhớ cái này để Vue gọi không bị lỗi CORS
+@RequiredArgsConstructor // 🔥 CHUẨN MỚI: Tự động tiêm Service, bỏ @Autowired
+@CrossOrigin(origins = "http://localhost:5173") // 🔥 Giữ nguyên cái này để Vue gọi
 public class VoucherController {
 
-    @Autowired
-    private VoucherService voucherService;
+    private final VoucherService voucherService; // 🔥 Thêm final, bỏ @Autowired
 
     @GetMapping
     public ResponseEntity<List<Voucher>> getAllVouchers() {
@@ -31,12 +31,15 @@ public class VoucherController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Voucher> updateVoucher(@PathVariable Long id, @Valid @RequestBody VoucherRequestDTO request) {
+    public ResponseEntity<Voucher> updateVoucher(
+            @PathVariable("id") Long id, // 🔥 FIX LỖI 400
+            @Valid @RequestBody VoucherRequestDTO request) {
         return ResponseEntity.ok(voucherService.updateVoucher(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteVoucher(@PathVariable Long id) {
+    public ResponseEntity<String> deleteVoucher(
+            @PathVariable("id") Long id) { // 🔥 FIX LỖI 400
         voucherService.deleteVoucher(id);
         return ResponseEntity.ok("Đã xóa mã Voucher thành công!");
     }
@@ -44,12 +47,10 @@ public class VoucherController {
     // 🔥 ĐOẠN NÀY LÀ MỚI THÊM: Cổng API cho nút "Áp dụng" bên POS
     @GetMapping("/check")
     public ResponseEntity<?> checkVoucher(
-            @RequestParam String code,
-            @RequestParam BigDecimal total) {
-        try {
-            return ResponseEntity.ok(voucherService.checkVoucher(code, total));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
-        }
+            @RequestParam("code") String code,   // 🔥 FIX LỖI 400: Thêm "code"
+            @RequestParam("total") BigDecimal total) { // 🔥 FIX LỖI 400: Thêm "total"
+
+        // 🔥 Đã dọn sạch try-catch, ném lỗi thẳng cho GlobalExceptionHandler lo!
+        return ResponseEntity.ok(voucherService.checkVoucher(code, total));
     }
 }
