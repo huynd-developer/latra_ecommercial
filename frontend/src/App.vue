@@ -19,6 +19,7 @@ import Header from './components/layout/Header.vue';
     <main>
       <router-view />
     </main>
+    <GlobalToast />
 
     <Footer v-if="!isAdminPage" />
   </div>
@@ -28,8 +29,9 @@ import Header from './components/layout/Header.vue';
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 // Đảm bảo bạn đã import Header và Footer đúng đường dẫn của bạn nhé
-import Header from './components/layout/Header.vue' 
-import Footer from './components/layout/Footer.vue' 
+import Header from './modules/shop/layout/Header.vue' 
+import Footer from './modules/shop/layout/Footer.vue' 
+import GlobalToast from './common/components/GlobalToast.vue'
 
 const route = useRoute()
 

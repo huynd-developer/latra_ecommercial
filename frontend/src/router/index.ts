@@ -1,93 +1,83 @@
+// frontend/src/router/index.ts
 import { createRouter, createWebHistory } from "vue-router";
 
-// Import các trang Khách (Storefront)
-import HomeView from "../views/HomeView.vue";
-import CategoryView from "../views/CategoryView.vue";
-import ProductDetailView from "../views/ProductDetailView.vue";
+// --- IMPORT ROUTER CỦA TỪNG MODULE (SHOP) ---
+import { homeRoutes } from "@/modules/shop/feature/home/router"; 
+import { catalogRoutes } from "@/modules/shop/feature/catalog/router";
+import { cartRoutes } from "@/modules/shop/feature/cart/router";
+import { checkoutRoutes } from "@/modules/shop/feature/checkout/router";
+
+// --- IMPORT ROUTER CỦA TỪNG MODULE (ADMIN) ---
+import { brandRoutes } from "@/modules/admin/feature/brand/router";
+import { categoryRoutes } from "@/modules/admin/feature/category/router";
+import { productRoutes } from "@/modules/admin/feature/product/router"; 
+import { inventoryRoutes } from "@/modules/admin/feature/inventory/router";
+import { promotionRoutes } from "@/modules/admin/feature/promotion/router";
+import { orderAdminRoutes } from "@/modules/admin/feature/order/router";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    // 1. GIAO DIỆN KHÁCH HÀNG (SHOP)
     {
       path: "/",
-      name: "home",
-      component: HomeView,
-    },
-    {
-      path: "/product/:id",
-      name: "product-detail",
-      component: ProductDetailView,
+      name: "ShopLayout",
+      // component: () => import("@/layout/ShopLayout.vue"), 
+      children: [
+        ...homeRoutes,      
+        ...catalogRoutes,
+        ...cartRoutes,
+        ...checkoutRoutes,
+      ]
     },
 
-    // -----------------------------------------------------------
-    // KHU VỰC DÀNH CHO ADMIN
-    // -----------------------------------------------------------
+    // 2. GIAO DIỆN QUẢN TRỊ (ADMIN)
     {
       path: "/admin",
-      name: "AdminDashboard",
+      name: "AdminLayout",
       redirect: '/admin/dashboard', 
-      component: () => import("../views/AdminView.vue"),
+      component: () => import("@/modules/admin/layout/AdminView.vue"),
       
       children: [
+        // --- CÁC ROUTE ĐÃ ĐƯỢC CHIA MODULE ---
         {
           path: "dashboard",
           name: "admin-dashboard-overview",
-          component: () => import("../components/admin/managers/DashboardOverview.vue"),
+          component: () => import("@/modules/admin/feature/dashboard/DashboardOverview.vue"),
         },
+        ...brandRoutes,        
+        ...categoryRoutes,     
+        ...productRoutes, 
+        ...inventoryRoutes,    
+        ...promotionRoutes,    
+        ...orderAdminRoutes,
+
+        // --- CÁC ROUTE CHƯA CÓ FILE ROUTER.TS (THÊM MỚI ĐỂ FIX LỖI WARNING) ---
         {
           path: "pos",
-          name: "admin-pos",
-          component: () => import("../components/admin/managers/PosManager.vue"),
-        },
-        {
-          path: "orders",
-          name: "admin-orders",
-          // Sử dụng @ts-ignore để ép TypeScript bỏ qua kiểm tra lỗi đường dẫn nếu nó vẫn ngoan cố
-          // @ts-ignore
-          component: () => import("../components/admin/managers/OrderManager.vue"),
-        },
-        {
-          path: "nhan-vien",
-          name: "admin-employees",
-          component: () => import("../components/admin/managers/EmployeeManager.vue"),
+          name: "AdminPOS",
+          component: () => import("@/modules/pos/PosManager.vue"),
+          meta: { title: "Bán hàng tại quầy (POS)" }
         },
         {
           path: "khach-hang",
-          name: "admin-customers",
-          component: () => import("../components/admin/managers/CustomerManager.vue"),
+          name: "AdminCustomer",
+          component: () => import("@/modules/admin/feature/managers/views/CustomerManager.vue"),
+          meta: { title: "Quản lý Khách hàng" }
         },
         {
-          path: "promotions",
-          name: "admin-promotions",
-          component: () => import("../components/admin/managers/VoucherManager.vue"),
-        },
-        {
-          path: "flash-sale",
-          name: "admin-flash-sale",
-          component: () => import("../components/admin/managers/FlashSaleManager.vue"),
-        },
-        {
-          path: "products",
-          name: "admin-products",
-          component: () => import("../components/admin/managers/ProductManager.vue"),
-        },
-        {
-          path: "imeis",
-          name: "admin-imeis",
-          component: () => import("../components/admin/managers/ImeiManager.vue"),
+          path: "nhan-vien",
+          name: "AdminEmployee",
+          component: () => import("@/modules/admin/feature/managers/views/EmployeeManager.vue"),
+          meta: { title: "Quản lý Nhân viên" }
         },
         {
           path: "settings",
-          name: "admin-settings",
-          component: () => import("../components/admin/managers/GenericManager.vue"),
+          name: "AdminSettings",
+          component: () => import("@/modules/admin/feature/settings/GenericManager.vue"),
+          meta: { title: "Cài đặt hệ thống" }
         }
       ],
-    },
-
-    {
-      path: "/:categorySlug",
-      name: "category",
-      component: CategoryView,
     },
   ],
 
@@ -99,5 +89,12 @@ const router = createRouter({
     }
   },
 });
-
+router.onError((error, to) => {
+  if (error.message.includes('Failed to fetch dynamically imported module') || error.message.includes('Importing a module script failed')) {
+    // Nếu lỗi do mạng/load file không kịp, ép trình duyệt tải lại trang đó luôn
+    window.location.href = to.fullPath;
+  } else {
+    console.error('Lỗi Router Navigation:', error);
+  }
+});
 export default router;

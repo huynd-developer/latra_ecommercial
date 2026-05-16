@@ -1,5 +1,7 @@
+// backend/src/main/java/trungdevcode/latra/entity/Cart.java
 package trungdevcode.latra.entity;
 
+import trungdevcode.latra.entity.base.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,10 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonPropertyOrder({"id", "userId", "items"})
-public class Cart {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Cart extends BaseEntity {
 
     @Column(name = "user_id", unique = true, nullable = false)
     private Long userId;

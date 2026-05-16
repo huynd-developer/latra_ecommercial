@@ -1,3 +1,5 @@
+// backend/src/main/java/trungdevcode/latra/entity/FlashSaleItem.java
+// (GIỮ NGUYÊN vì dùng Composite Key - @EmbeddedId)
 package trungdevcode.latra.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

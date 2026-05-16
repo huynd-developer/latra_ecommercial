@@ -1,3 +1,5 @@
+// backend/src/main/java/trungdevcode/latra/entity/OrderDetailKey.java
+// (GIỮ NGUYÊN vì là Composite Key)
 package trungdevcode.latra.entity;
 
 import jakarta.persistence.Column;

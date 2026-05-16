@@ -1,4 +1,7 @@
+// backend/src/main/java/trungdevcode/latra/entity/Category.java
 package trungdevcode.latra.entity;
+
+import trungdevcode.latra.entity.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,14 +11,14 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Category {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Category extends BaseEntity {
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
     @Column(name = "parent_id")
     private Long parentId;
+
+    @Column(name = "status", nullable = false)
+    private Integer status = 1;
 }

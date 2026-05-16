@@ -1,5 +1,5 @@
 import { reactive, computed } from 'vue'
-import type { Product } from '../data/db'
+import type { Product } from '../common/db'
 
 // Tạo một kho dữ liệu dùng chung cho toàn bộ app
 export const cartStore = reactive({

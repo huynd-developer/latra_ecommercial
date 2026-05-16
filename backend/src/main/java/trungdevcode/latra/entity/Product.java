@@ -1,10 +1,10 @@
+// backend/src/main/java/trungdevcode/latra/entity/Product.java
 package trungdevcode.latra.entity;
+
+import trungdevcode.latra.entity.base.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -13,11 +13,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Product extends BaseEntity {
 
     @Column(name = "name", nullable = false, columnDefinition = "NVARCHAR(150)")
     private String name;
@@ -28,17 +24,16 @@ public class Product {
     @Column(name = "status")
     private Integer status = 1;
 
-    @CreatedDate
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
     @Column(name = "brand_id")
     private Long brandId;
 
     @Column(name = "category_id")
     private Long categoryId;
+    
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<ProductVariant> variants;
+    
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<ProductImage> images;
