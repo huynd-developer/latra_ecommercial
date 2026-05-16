@@ -1,5 +1,7 @@
+// backend/src/main/java/trungdevcode/latra/entity/FlashSale.java
 package trungdevcode.latra.entity;
 
+import trungdevcode.latra.entity.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -11,10 +13,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FlashSale {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class FlashSale extends BaseEntity {
 
     @Column(name = "name", length = 100)
     private String name;
@@ -28,6 +27,6 @@ public class FlashSale {
     @Column(name = "status")
     private String status;
 
-    @OneToMany(mappedBy = "flashSale", cascade = CascadeType.ALL, fetch = FetchType.EAGER) // <-- Thêm fetch = FetchType.EAGER
+    @OneToMany(mappedBy = "flashSale", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<FlashSaleItem> items;
 }

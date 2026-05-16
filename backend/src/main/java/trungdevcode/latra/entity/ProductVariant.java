@@ -1,5 +1,7 @@
+// backend/src/main/java/trungdevcode/latra/entity/ProductVariant.java
 package trungdevcode.latra.entity;
 
+import trungdevcode.latra.entity.base.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -8,16 +10,15 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@Table(name = "product_variants")
+@Table(name = "product_variants", indexes = {
+        @Index(name = "idx_sku", columnList = "sku", unique = true),
+        @Index(name = "idx_product_id", columnList = "product_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductVariant {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class ProductVariant extends BaseEntity {
 
     @Column(name = "color", columnDefinition = "NVARCHAR(50)")
     private String color;
@@ -33,16 +34,16 @@ public class ProductVariant {
 
     @Column(name = "sku", unique = true)
     private String sku;
+    
     @Column(name = "condition", length = 50)
     private String condition;
+    
     @ManyToOne
     @JoinColumn(name = "product_id")
-    // THÊM DÒNG NÀY ĐỂ CHẶN VÒNG LẶP:
     @JsonIgnoreProperties("variants")
     private Product product;
 
-    // Trong file ProductVariant.java
     @OneToMany(mappedBy = "variant")
-    @JsonIgnore // <--- THÊM VÀO ĐÂY NỮA
+    @JsonIgnore 
     private List<Imei> imeis;
 }
