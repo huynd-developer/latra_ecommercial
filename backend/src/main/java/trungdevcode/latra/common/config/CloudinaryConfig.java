@@ -1,5 +1,5 @@
 // backend/src/main/java/trungdevcode/latra/config/CloudinaryConfig.java
-package trungdevcode.latra.config;
+package trungdevcode.latra.common.config;
 
 import com.cloudinary.Cloudinary;
 import org.springframework.beans.factory.annotation.Value;

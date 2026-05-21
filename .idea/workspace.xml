@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="54b316aa-6f0e-4567-9206-b0e474dc3e04" name="Changes" comment="&quot;Update backend cac chuc nang&quot;">
+    <list default="true" id="54b316aa-6f0e-4567-9206-b0e474dc3e04" name="Changes" comment="&quot;Update backend&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/VoucherController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/Controller/VoucherController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/donHang/controller/DonHangController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/donHang/controller/DonHangController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/common/config/CloudinaryConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/common/config/CloudinaryConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,6 +29,7 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -55,31 +56,37 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "Spring Boot.LatraApplication.executor": "Run",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_directory_selection": "E:/JavaWeb/LATRA/LATRA/src/main/java/trungdevcode/latra",
-    "last_opened_file_path": "E:/JavaWeb/LATRA/backend/src/main/java/trungdevcode/latra/voucher",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;Spring Boot.LatraApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_directory_selection&quot;: &quot;E:/JavaWeb/LATRA/LATRA/src/main/java/trungdevcode/latra&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/JavaWeb/LATRA/backend/src/main/java/trungdevcode/latra/voucher&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.1.7\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;sqlserver&quot;
+    ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
       <recent name="trungdevcode.latra.Service" />
@@ -173,7 +180,19 @@
       <workItem from="1778251391778" duration="6774000" />
       <workItem from="1778294861022" duration="4454000" />
       <workItem from="1778402186344" duration="1876000" />
-      <workItem from="1778518613269" duration="717000" />
+      <workItem from="1778518613269" duration="1562000" />
+      <workItem from="1778663034170" duration="6000" />
+      <workItem from="1778920349961" duration="259000" />
+      <workItem from="1778920614458" duration="1141000" />
+      <workItem from="1778921767039" duration="2466000" />
+      <workItem from="1778926603568" duration="15000" />
+      <workItem from="1778995668148" duration="900000" />
+      <workItem from="1779194930359" duration="2952000" />
+      <workItem from="1779197921289" duration="435000" />
+      <workItem from="1779198372289" duration="319000" />
+      <workItem from="1779199014720" duration="5233000" />
+      <workItem from="1779265429693" duration="635000" />
+      <workItem from="1779286940234" duration="4467000" />
     </task>
     <task id="LOCAL-00001" summary="&quot;Hoàn thiện API Giỏ hàng và Checkout (Trừ kho chuẩn) - Done 100%&quot;">
       <option name="closed" value="true" />
@@ -239,7 +258,31 @@
       <option name="project" value="LOCAL" />
       <updated>1778247992724</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="&quot;Update backend&quot;">
+      <option name="closed" value="true" />
+      <created>1778519477778</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1778519477778</updated>
+    </task>
+    <task id="LOCAL-00010" summary="&quot;Update backend&quot;">
+      <option name="closed" value="true" />
+      <created>1778921324058</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1778921324058</updated>
+    </task>
+    <task id="LOCAL-00011" summary="&quot;Update backend&quot;">
+      <option name="closed" value="true" />
+      <created>1778921349181</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1778921349181</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -252,7 +295,8 @@
     <MESSAGE value="&quot;update bên quản lý khách hàng và nhân viên&quot;" />
     <MESSAGE value="&quot;Hoàn thiện gần như hết các chức năng thiếu phần dashboard&quot;" />
     <MESSAGE value="&quot;Update backend cac chuc nang&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="&quot;Update backend cac chuc nang&quot;" />
+    <MESSAGE value="&quot;Update backend&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="&quot;Update backend&quot;" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/LATRA$LatraApplication.ic" NAME="LatraApplication Coverage Results" MODIFIED="1778250732437" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
