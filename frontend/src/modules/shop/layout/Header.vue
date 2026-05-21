@@ -11,7 +11,7 @@
           
           <li class="nav-item mega-menu-wrapper" @click.stop="toggleMenu('products')">
             <a class="nav-link custom-link" href="#" @click.prevent>
-              Cases 
+              Điện thoại 
               <i class="bi bi-chevron-down ms-1 arrow-icon" :class="{ 'rotate-180': activeMenu === 'products' }"></i>
             </a>
 
@@ -88,7 +88,7 @@
 
           <li class="nav-item mega-menu-wrapper" @click.stop="toggleMenu('screen')">
             <a class="nav-link custom-link" href="#" @click.prevent>
-              Screen Protection 
+              Máy cũ
               <i class="bi bi-chevron-down ms-1 arrow-icon" :class="{ 'rotate-180': activeMenu === 'screen' }"></i>
             </a>
 
@@ -168,7 +168,7 @@
 
           <li class="nav-item mega-menu-wrapper" @click.stop="toggleMenu('charging')">
             <a class="nav-link custom-link" href="#" @click.prevent>
-              Charging 
+              Phụ kiện
               <i class="bi bi-chevron-down ms-1 arrow-icon" :class="{ 'rotate-180': activeMenu === 'charging' }"></i>
             </a>
 
@@ -234,7 +234,7 @@
 
           <li class="nav-item mega-menu-wrapper" @click.stop="toggleMenu('accessories')">
             <a class="nav-link custom-link" href="#" @click.prevent>
-              Accessories 
+              Giới thiệu
               <i class="bi bi-chevron-down ms-1 arrow-icon" :class="{ 'rotate-180': activeMenu === 'accessories' }"></i>
             </a>
 
@@ -321,7 +321,7 @@
 
           <li class="nav-item simple-dropdown-wrapper" @click.stop="toggleMenu('about')">
             <a class="nav-link custom-link" href="#" @click.prevent>
-              About 
+              Hỗ trợ 
               <i class="bi bi-chevron-down ms-1 arrow-icon" :class="{ 'rotate-180': activeMenu === 'about' }"></i>
             </a>
             

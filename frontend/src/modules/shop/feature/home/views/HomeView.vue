@@ -10,13 +10,15 @@
     <div v-else>
       <HeroBanner />
       
-      <FeatureSection />
+      <!-- <FeatureSection /> -->
       
       <!-- Hiện Flash Sale nếu có chương trình -->
       <HomeFlashSale v-if="homeStore.activeFlashSale" :sale="homeStore.activeFlashSale" />
 
       <!-- Hiện danh sách Sản phẩm mới -->
       <HomeProductList v-if="homeStore.featuredProducts.length > 0" :products="homeStore.featuredProducts" />
+        <ProductFeature/>
+        <WhyChooseUs/>
     </div>
   </div>
 </template>
@@ -24,12 +26,12 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useHomeStore } from '../stores/homeStore';
-
+import WhyChooseUs from '../components/WhyChooseUs.vue';
 import HeroBanner from '../components/HeroBanner.vue';
 import FeatureSection from '../components/FeatureSection.vue';
 import HomeFlashSale from '../components/HomeFlashSale.vue';
 import HomeProductList from '../components/HomeProductList.vue';
-
+import ProductFeature from '../components/ProductFeature.vue' 
 const homeStore = useHomeStore();
 
 onMounted(() => {
