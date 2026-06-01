@@ -1,4 +1,3 @@
-<!-- frontend/src/modules/admin/feature/order/views/OrderManagerView.vue -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useOrderAdminStore } from '../stores/orderAdminStore';
@@ -32,6 +31,19 @@ const handleRefreshDetail = async () => {
   }
   store.fetchOrders(); // Refresh table
 };
+
+// 🎁 Mẹo thực tế: Hàm tô màu trạng thái cho dễ nhìn
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case 'PENDING': return 'bg-warning text-dark';
+    case 'PREPARING': return 'bg-info text-white';
+    case 'DELIVERING': return 'bg-primary text-white';
+    case 'COMPLETED': case 'DELIVERED': return 'bg-success text-white';
+    case 'CANCELLED': case 'RETURNED': return 'bg-danger text-white';
+    case 'REFUNDED': return 'bg-secondary text-white';
+    default: return 'bg-slate-200 text-slate-800';
+  }
+};
 </script>
 
 <template>
@@ -46,7 +58,6 @@ const handleRefreshDetail = async () => {
       </div>
     </div>
 
-    <!-- Vẽ lại cái Table HTML y hệt file cũ của bạn, trỏ vào mảng `filteredOrders`, gọi `openDetail(order.id)` khi click dòng -->
     <div class="bg-white rounded-xl shadow-sm border overflow-auto flex-grow-1">
       <table class="table table-hover align-middle mb-0">
         <thead class="bg-light text-muted small text-uppercase sticky-top">
@@ -74,7 +85,7 @@ const handleRefreshDetail = async () => {
                 {{ order.paymentMethod }}
               </span>
             </td>
-            <td><span class="badge bg-slate-200 text-slate-800">{{ order.status }}</span></td>
+            <td><span class="badge" :class="getStatusBadge(order.status)">{{ order.status }}</span></td>
             <td class="pe-4 text-end"><button class="btn btn-sm btn-outline-dark rounded-pill">Chi tiết</button></td>
           </tr>
         </tbody>

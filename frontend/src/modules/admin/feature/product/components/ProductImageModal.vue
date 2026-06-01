@@ -57,7 +57,7 @@ const uploadImage = async () => {
 
         <div class="mt-4 pt-3 border-top d-flex gap-2">
           <button type="button" @click="closeImageModal" class="btn btn-light w-50 py-2 fw-medium">Hủy</button>
-          <button type="button" @click="uploadImage" :disabled="!selectedFile || isUploading" class="btn btn-dark w-50 py-2 fw-medium d-flex justify-content-center align-items-center">
+          <button v-permission="['OWNER', 'MANAGER']" type="button" @click="uploadImage" :disabled="!selectedFile || isUploading" class="btn btn-dark w-50 py-2 fw-medium d-flex justify-content-center align-items-center">
             <span v-if="isUploading" class="spinner-border spinner-border-sm me-2"></span>
             Lưu hình ảnh
           </button>

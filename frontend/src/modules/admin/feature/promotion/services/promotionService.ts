@@ -4,21 +4,21 @@ import type { FlashSale, Voucher, VoucherAnalytics } from '../types/promotion.ty
 import type { ApiResponse } from '@/common/types/api.type';
 
 export const promotionService = {
-  // FLASH SALE
+  // FLASH SALE (Đã sửa lại URL cho khớp với Backend)
   getFlashSales: async (): Promise<FlashSale[]> => {
-    const res = await request.get<any, ApiResponse<FlashSale[]>>('/flash-sales/admin');
+    const res = await request.get<any, ApiResponse<FlashSale[]>>('/flash-sales');
     return res.data;
   },
   createFlashSale: async (payload: FlashSale): Promise<string> => {
-    const res = await request.post<any, ApiResponse<FlashSale>>('/flash-sales/admin', payload);
+    const res = await request.post<any, ApiResponse<FlashSale>>('/flash-sales', payload);
     return res.message;
   },
   updateFlashSale: async (id: number, payload: FlashSale): Promise<string> => {
-    const res = await request.put<any, ApiResponse<FlashSale>>(`/flash-sales/admin/${id}`, payload);
+    const res = await request.put<any, ApiResponse<FlashSale>>(`/flash-sales/${id}`, payload);
     return res.message;
   },
   deleteFlashSale: async (id: number): Promise<string> => {
-    const res = await request.delete<any, ApiResponse<string>>(`/flash-sales/admin/${id}`);
+    const res = await request.delete<any, ApiResponse<string>>(`/flash-sales/${id}`);
     return res.message;
   },
   getVoucherAnalytics: async (): Promise<VoucherAnalytics[]> => {
@@ -26,7 +26,7 @@ export const promotionService = {
     return res.data;
   },
 
-  // VOUCHER
+  // VOUCHER (Giữ nguyên vì tao chưa xem Controller của Voucher, nếu lỗi tương tự thì tự bỏ /admin đi nhé)
   getVouchers: async (): Promise<Voucher[]> => {
     const res = await request.get<any, ApiResponse<Voucher[]>>('/vouchers/admin');
     return res.data;

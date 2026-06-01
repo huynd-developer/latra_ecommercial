@@ -4,6 +4,7 @@ import { usePromotionStore } from "../stores/promotionStore";
 import { promotionService } from "../services/promotionService";
 import { useAppStore } from "@/common/store/app.store";
 import VoucherModal from "../components/VoucherModal.vue";
+import { ROLES } from "@/common/constants/permissions"; // 🔑 Import ROLES
 
 const store = usePromotionStore();
 const appStore = useAppStore();
@@ -13,8 +14,14 @@ const showModal = ref(false);
 const selectedVoucher = ref<any>(null);
 
 onMounted(() => { 
+  // 1. Tất cả các quyền (bao gồm cả CASHIER) đều được lấy danh sách Voucher
   store.fetchVouchers(); 
-  store.fetchVoucherAnalytics();
+
+  // 2. 🛡️ Kiểm tra nếu KHÔNG PHẢI CASHIER thì mới gọi API thống kê để tránh lỗi alert 403
+  const currentUser = localStorage.getItem("currentUser") || "";
+  if (!currentUser.includes("CASHIER")) {
+    store.fetchVoucherAnalytics(); 
+  }
 });
 
 const openAddModal = () => { selectedVoucher.value = null; showModal.value = true; };
@@ -29,24 +36,25 @@ const deleteVoucher = async (id: number) => {
     store.fetchVouchers();
   } catch (err: any) {
     appStore.notifyError(err.response?.data?.message || 'Lỗi không thể xóa!');
-  } finally {
+  } finally { 
     appStore.stopLoading();
   }
 };
 
-const formatMoney = (val: number | null) => {
+const formatMoney = (val: number | null | undefined) => {
   if (val == null) return "0đ";
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
 };
 
-const formatDiscount = (val: number, type: string) => {
+const formatDiscount = (val: number | null | undefined, type: string | null | undefined) => {
+  if (val == null) return "0đ";
   return type === 'PERCENTAGE' ? `Giảm ${val}%` : `Giảm ${formatMoney(val)}`;
 };
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return "";
   const d = new Date(dateStr);
-  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')} - ${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')} - ${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 };
 
 const getStatusBadge = (promo: any) => {
@@ -69,15 +77,30 @@ const getStatusBadge = (promo: any) => {
       <div>
         <h5 class="fw-semibold mb-3">Trung Tâm Khuyến Mãi (Voucher)</h5>
         <div class="btn-group bg-white p-1 rounded-pill border shadow-sm">
-          <button @click="activeTab = 'LIST'" class="btn rounded-pill px-4 fw-medium btn-sm" :class="activeTab === 'LIST' ? 'btn-dark' : 'btn-light text-muted border-0'">
+          <button 
+            @click="activeTab = 'LIST'" 
+            class="btn rounded-pill px-4 fw-medium btn-sm" 
+            :class="activeTab === 'LIST' ? 'btn-dark' : 'btn-light text-muted border-0'"
+          >
             Danh sách Mã
           </button>
-          <button @click="activeTab = 'ANALYTICS'" class="btn rounded-pill px-4 fw-medium btn-sm" :class="activeTab === 'ANALYTICS' ? 'btn-dark' : 'btn-light text-muted border-0'">
+          
+          <button 
+            v-permission="[ROLES.OWNER, ROLES.MANAGER]"
+            @click="activeTab = 'ANALYTICS'" 
+            class="btn rounded-pill px-4 fw-medium btn-sm" 
+            :class="activeTab === 'ANALYTICS' ? 'btn-dark' : 'btn-light text-muted border-0'"
+          >
             Thống Kê Hiệu Quả
           </button>
         </div>
       </div>
-      <button v-if="activeTab === 'LIST'" @click="openAddModal" class="btn btn-dark rounded-pill px-4 fw-medium shadow-sm">
+      <button 
+        v-if="activeTab === 'LIST'" 
+        @click="openAddModal" 
+        v-permission="[ROLES.OWNER, ROLES.MANAGER]"
+        class="btn btn-dark rounded-pill px-4 fw-medium shadow-sm"
+      >
         + Tạo Voucher Mới
       </button>
     </div>
@@ -95,30 +118,50 @@ const getStatusBadge = (promo: any) => {
           </tr>
         </thead>
         <tbody>
-          <tr v-if="store.vouchers.length === 0"><td colspan="6" class="text-center py-5 text-muted fw-medium">Chưa có mã khuyến mãi nào.</td></tr>
-          <tr v-for="promo in store.vouchers" :key="promo.id!">
-            <td class="ps-4 py-3 border-bottom border-light font-bold text-lg text-primary">{{ promo.code }}</td>
+          <tr v-if="!store.vouchers || store.vouchers.length === 0">
+            <td colspan="6" class="text-center py-5 text-muted fw-medium">Chưa có mã khuyến mãi nào.</td>
+          </tr>
+          <tr v-for="promo in store.vouchers" :key="(promo as any).id">
+            <td class="ps-4 py-3 border-bottom border-light font-bold text-lg text-primary">
+              {{ (promo as any).code }}
+            </td>
             <td class="py-3 border-bottom border-light">
-              <div class="fw-semibold text-dark">{{ formatDiscount(promo.value, promo.discountType) }}</div>
-              <div class="small text-muted">Đơn từ: {{ formatMoney(promo.minOrderValue) }}</div>
+              <div class="fw-semibold text-dark">
+                {{ formatDiscount((promo as any).value || (promo as any).discountValue, (promo as any).discountType) }}
+              </div>
+              <div class="small text-muted">
+                Đơn từ: {{ formatMoney((promo as any).minOrderValue) }}
+              </div>
             </td>
             <td class="py-3 border-bottom border-light small text-muted">
-              <div><span class="fw-medium">Từ:</span> {{ formatDate(promo.startDate) }}</div>
-              <div><span class="fw-medium">Đến:</span> {{ formatDate(promo.expiredAt) }}</div>
+              <div><span class="fw-medium">Từ:</span> {{ formatDate((promo as any).startDate) }}</div>
+              <div><span class="fw-medium">Đến:</span> {{ formatDate((promo as any).expiredAt) }}</div>
             </td>
-            <td class="py-3 border-bottom border-light text-center fw-semibold fs-6">{{ promo.usageLimit }}</td>
+            <td class="py-3 border-bottom border-light text-center fw-semibold fs-6">
+              {{ (promo as any).usageLimit }}
+            </td>
             <td class="py-3 border-bottom border-light text-center">
               <span class="badge rounded-pill px-3 py-2 fw-normal" :class="getStatusBadge(promo).class">
                 {{ getStatusBadge(promo).text }}
               </span>
             </td>
             <td class="text-end pe-4 py-3 border-bottom border-light">
-              <button @click="openEditModal(promo)" class="btn btn-sm btn-light rounded-circle p-2 mx-1 text-dark" title="Sửa">
+              <button 
+                @click="openEditModal(promo)" 
+                v-permission="[ROLES.OWNER, ROLES.MANAGER]"
+                class="btn btn-sm btn-light rounded-circle p-2 mx-1 text-dark" 
+                title="Sửa"
+              >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
               </button>
-             <button @click="deleteVoucher(promo.id!)" class="btn btn-sm btn-light text-danger rounded-circle">
-  <i class="bi bi-trash3-fill"></i>
-</button>
+              <button 
+                @click="deleteVoucher((promo as any).id)" 
+                v-permission="[ROLES.OWNER]"
+                class="btn btn-sm btn-light text-danger rounded-circle p-2" 
+                title="Xóa"
+              >
+                <i class="bi bi-trash3-fill"></i>
+              </button>
             </td>
           </tr>
         </tbody>
@@ -142,7 +185,9 @@ const getStatusBadge = (promo: any) => {
             </tr>
           </thead>
           <tbody>
-            <tr v-if="store.voucherAnalytics.length === 0"><td colspan="4" class="text-center py-5 text-muted fw-medium border-top">Chưa có dữ liệu thống kê.</td></tr>
+            <tr v-if="!store.voucherAnalytics || store.voucherAnalytics.length === 0">
+              <td colspan="4" class="text-center py-5 text-muted fw-medium border-top">Chưa có dữ liệu thống kê.</td>
+            </tr>
             <tr v-for="stat in store.voucherAnalytics" :key="stat.voucherCode">
               <td class="ps-4 py-3 border-top border-light font-bold text-dark">{{ stat.voucherCode }}</td>
               <td class="text-center py-3 border-top border-light font-bold text-primary fs-6">{{ stat.totalUsage }} lượt</td>

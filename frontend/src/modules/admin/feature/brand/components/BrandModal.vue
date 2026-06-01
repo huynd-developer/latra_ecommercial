@@ -1,25 +1,29 @@
 <template>
   <div>
-    <div class="offcanvas-backdrop fade show" @click="closeModal"></div>
+    <div
+      class="offcanvas-backdrop fade show"
+      @click="closeModal"
+      style="z-index: 1040"
+    ></div>
 
     <div
       class="offcanvas offcanvas-end show shadow-lg border-0"
       tabindex="-1"
-      style="visibility: visible"
+      style="visibility: visible; z-index: 1045"
     >
-      <div class="offcanvas-header border-bottom px-4 py-3">
-        <h5 class="offcanvas-title fw-semibold">
+      <div class="offcanvas-header border-bottom px-4 py-3 bg-light">
+        <h5 class="offcanvas-title fw-bold">
           {{ isEdit ? "Cập nhật thương hiệu" : "Thêm thương hiệu" }}
         </h5>
         <button
           type="button"
-          class="btn-close"
+          class="btn-close shadow-none"
           @click="closeModal"
           aria-label="Close"
         ></button>
       </div>
 
-      <div class="offcanvas-body px-4">
+      <div class="offcanvas-body px-4 py-4">
         <form
           @submit.prevent="handleSubmit"
           novalidate
@@ -27,16 +31,15 @@
         >
           <div class="flex-grow-1">
             <div class="mb-4">
-              <div class="d-flex justify-content-between mb-1">
-                <label class="form-label fw-medium mb-0">Tên thương hiệu</label>
-                <small class="text-muted opacity-75">Bắt buộc</small>
-              </div>
+              <label class="form-label fw-medium"
+                >Tên thương hiệu <span class="text-danger">*</span></label
+              >
               <input
                 v-model="formData.name"
                 @blur="validateField('name')"
                 @input="validateField('name')"
                 type="text"
-                class="form-control bg-light border-0 py-2"
+                class="form-control shadow-none py-2"
                 :class="{ 'is-invalid': errors.name }"
                 placeholder="Ví dụ: Apple, Nike..."
               />
@@ -44,43 +47,48 @@
             </div>
 
             <div class="mb-4">
-              <div class="d-flex justify-content-between mb-1">
-                <label class="form-label fw-medium mb-0">Quốc gia</label>
-                <small class="text-muted opacity-75">Bắt buộc</small>
-              </div>
-
+              <label class="form-label fw-medium"
+                >Quốc gia <span class="text-danger">*</span></label
+              >
               <input
                 v-model="formData.country"
                 list="country-list"
                 @blur="validateField('country')"
                 @input="validateField('country')"
                 type="text"
-                class="form-control bg-light border-0 py-2"
+                class="form-control shadow-none py-2"
                 :class="{ 'is-invalid': errors.country }"
                 placeholder="Gõ hoặc chọn quốc gia..."
               />
-
               <datalist id="country-list">
-                <option v-for="(country, index) in countryList" :key="index" :value="country"></option>
+                <option
+                  v-for="(country, index) in countryList"
+                  :key="index"
+                  :value="country"
+                ></option>
               </datalist>
-
               <div class="invalid-feedback">{{ errors.country }}</div>
             </div>
-            
+
             <div class="mb-4">
-              <label class="form-label fw-medium mb-1">Trạng thái</label>
+              <label class="form-label fw-medium">Trạng thái</label>
               <select
                 v-model="formData.status"
-                class="form-select bg-light border-0 py-2"
+                :disabled="!isOwner"
+                class="form-select shadow-none py-2"
               >
                 <option :value="1">Đang hoạt động</option>
-                <option :value="0">Ngừng hoạt động</option>
+                <option :value="0">Ngừng hoạt động (Khóa)</option>
               </select>
+              <div v-if="!isOwner" class="form-text text-muted small mt-1">
+                * Chỉ Chủ hệ thống (Owner) mới được phép thay đổi trạng thái
+                hoạt động.
+              </div>
             </div>
 
             <div class="mb-4">
               <label class="form-label fw-medium mb-2">Logo thương hiệu</label>
-              <div style="width: 120px">
+              <div style="width: 130px">
                 <ImageUploader
                   :initial-url="previewUrl"
                   ratio="1/1"
@@ -96,9 +104,10 @@
               @click="closeModal"
               class="btn btn-light w-50 py-2 fw-medium"
             >
-              Hủy
+              Hủy bỏ
             </button>
             <button
+              v-permission="['OWNER', 'MANAGER']"
               type="submit"
               :disabled="isSubmitting || hasErrors"
               class="btn btn-dark w-50 py-2 fw-medium d-flex justify-content-center align-items-center"
@@ -121,10 +130,9 @@
 import { ref, reactive, onMounted, computed } from "vue";
 import type { Brand, BrandRequestDTO } from "../types/brand.type";
 import { brandService } from "../services/brandService";
-import { useAppStore } from "@/common/store/app.store";
-import ImageUploader from "@/common/components/ImageUploader.vue"; 
+import ImageUploader from "@/common/components/ImageUploader.vue";
+import Swal from "sweetalert2";
 
-const appStore = useAppStore();
 const props = defineProps<{ brandSelected: Brand | null }>();
 const emit = defineEmits<{ (e: "close"): void; (e: "refresh"): void }>();
 
@@ -136,7 +144,6 @@ const previewUrl = ref<string | null>(null);
 const formData = ref<BrandRequestDTO>({ name: "", country: "", status: 1 });
 const errors = reactive({ name: "", country: "" });
 
-// Đã chuyển danh sách quốc gia xuống đây
 const countryList = [
   "Việt Nam",
   "Hoa Kỳ (Mỹ)",
@@ -149,9 +156,18 @@ const countryList = [
   "Ý",
   "Anh",
   "Thụy Sĩ",
-  "Thái Lan",
-  "Singapore"
 ];
+
+// 🛠️ ĐÃ FIX: Logic lấy role để kiểm tra quyền khóa status (Chỉ OWNER mới được sửa)
+const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+const isOwner = computed(() => {
+  const role = currentUser.role || currentUser.roles?.[0] || "";
+  return role.toUpperCase().replace("ROLE_", "") === "OWNER";
+});
+
+// Hàm hỗ trợ lấy base url để render ảnh
+const getBaseUrl = () =>
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 onMounted(() => {
   if (props.brandSelected) {
@@ -160,11 +176,12 @@ onMounted(() => {
       country: props.brandSelected.country,
       status: props.brandSelected.status,
     };
-    
-    // Đã cập nhật: Xử lý Cloudinary URL cho ảnh preview
+
     if (props.brandSelected.logo) {
       const logoUrl = props.brandSelected.logo;
-      previewUrl.value = logoUrl.startsWith('http') ? logoUrl : `http://localhost:8080/uploads/brands/${logoUrl}`;
+      previewUrl.value = logoUrl.startsWith("http")
+        ? logoUrl
+        : `${getBaseUrl()}/uploads/brands/${logoUrl}`;
     }
   }
 });
@@ -173,14 +190,14 @@ const closeModal = () => emit("close");
 
 const validateField = (field: "name" | "country") => {
   if (field === "name") {
-    const val = formData.value.name.trim();
-    if (!val) errors.name = "Vui lòng nhập tên thương hiệu.";
-    else errors.name = "";
+    errors.name = !formData.value.name.trim()
+      ? "Vui lòng nhập tên thương hiệu."
+      : "";
   }
   if (field === "country") {
-    const val = formData.value.country.trim();
-    if (!val) errors.country = "Vui lòng nhập quốc gia.";
-    else errors.country = "";
+    errors.country = !formData.value.country.trim()
+      ? "Vui lòng nhập quốc gia."
+      : "";
   }
 };
 
@@ -205,28 +222,35 @@ const handleSubmit = async () => {
       targetBrandId = props.brandSelected.id;
       await brandService.updateBrand(targetBrandId, formData.value);
     } else {
-      const newBrand = await brandService.createBrand(formData.value);
-      targetBrandId = newBrand.id;
+      const response = await brandService.createBrand(formData.value);
+      targetBrandId = response.id; // Chỉ cần thế này là xong!
     }
 
+    // Nếu người dùng có chọn upload file logo mới
     if (selectedFile.value && targetBrandId) {
       await brandService.uploadLogo(targetBrandId, selectedFile.value);
     }
 
-    appStore.notifySuccess(isEdit.value ? "Đã cập nhật" : "Đã thêm mới");
+    Swal.fire({
+      icon: "success",
+      title: "Thành công",
+      text: isEdit.value
+        ? "Cập nhật thông tin thành công!"
+        : "Thêm mới thương hiệu thành công!",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+
     emit("refresh");
     closeModal();
   } catch (error: any) {
-    appStore.notifyError(error.response?.data?.message || "Có lỗi xảy ra!");
+    Swal.fire({
+      icon: "error",
+      title: "Thất bại",
+      text: error.response?.data?.message || "Có lỗi xảy ra khi lưu dữ liệu!",
+    });
   } finally {
     isSubmitting.value = false;
   }
 };
 </script>
-
-<style scoped>
-.form-control:focus,
-.form-select:focus {
-  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.05);
-}
-</style>

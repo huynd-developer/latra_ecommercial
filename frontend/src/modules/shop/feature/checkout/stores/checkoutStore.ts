@@ -1,4 +1,3 @@
-// frontend/src/modules/shop/feature/checkout/stores/checkoutStore.ts
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { checkoutService } from '../services/checkoutService';
@@ -17,7 +16,7 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
     isRequestVat: false, taxId: '', companyName: '', companyEmail: '', companyAddress: ''
   });
 
-  const availableVouchers = ref<any[]>([]); // Lưu voucher thật
+  const availableVouchers = ref<any[]>([]); 
   const agreeToTerms = ref(false);
   const appliedDiscount = ref<number>(0);
   const isProcessing = ref(false);
@@ -28,7 +27,6 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
     return total > 0 ? total : 0;
   });
 
-  // Gọi API lấy voucher
   const fetchActiveVouchers = async () => {
     try {
       availableVouchers.value = await checkoutService.getActiveVouchers();
@@ -38,7 +36,7 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
   };
 
   const autoFillMockData = () => {
-    formState.value.customerName = 'Nguyễn Kiều Diễm Ly'; // Mock name
+    formState.value.customerName = 'Nguyễn Kiều Diễm Ly';
     formState.value.customerPhone = '0901234567';
     formState.value.customerEmail = 'diemly@gmail.com';
     formState.value.province = 'Hà Nội';
@@ -61,7 +59,6 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
     } catch (error: any) {
       appliedDiscount.value = 0;
       formState.value.voucherCode = null;
-      // Thông báo rõ ràng lý do lỗi từ backend
       appStore.notifyError(error.response?.data?.message || "Mã không hợp lệ hoặc đơn chưa đủ điều kiện");
     } finally {
       appStore.stopLoading();
@@ -75,15 +72,14 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
 
   const processCheckout = async () => {
     if (!agreeToTerms.value) throw new Error("Vui lòng đồng ý với Điều khoản dịch vụ!");
-    if (!formState.value.customerName.trim()) throw new Error("Vui lòng nhập họ tên!");
-    if (!cartStore.cartData || cartStore.cartData.items.length === 0) throw new Error("Giỏ hàng trống!");
+    if (!formState.value.customerName?.trim()) throw new Error("Vui lòng nhập họ tên!");
+    if (!cartStore.cartData || !cartStore.cartData?.items?.length) throw new Error("Giỏ hàng trống!");
 
-    const fullAddress = `${formState.value.street}, ${formState.value.ward}, ${formState.value.district}, ${formState.value.province}`;
-    let finalNote = `[KH: ${formState.value.customerName} - ${formState.value.customerPhone}] ${formState.value.note}`;
+    const fullAddress = `${formState.value.street || ''}, ${formState.value.ward || ''}, ${formState.value.district || ''}, ${formState.value.province || ''}`;
+    let finalNote = `[KH: ${formState.value.customerName} - ${formState.value.customerPhone}] ${formState.value.note || ''}`;
     
-    // 🚨 QUAN TRỌNG NHẤT: BẠN PHẢI ĐẢM BẢO TRONG BẢNG `users` TRONG MYSQL CỦA BẠN CÓ TÀI KHOẢN MANG ID = 1. NẾU KHÔNG DATABASE SẼ SẬP.
     const payload: CheckoutRequest = {
-      userId: 1, // HARDCODE BẮT BUỘC ĐỂ DATABASE NHẬN DIỆN NGƯỜI DÙNG
+      userId: 1, 
       paymentMethod: formState.value.paymentMethod,
       shippingAddress: fullAddress,
       voucherCode: formState.value.voucherCode,
@@ -97,7 +93,7 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || "Lỗi giao tiếp máy chủ, không thể tạo đơn!";
       console.error("LỖI CHECKOUT NGHIÊM TRỌNG:", error.response?.data);
-      throw new Error(errorMsg); // Ném lỗi ra View
+      throw new Error(errorMsg);
     } finally {
       isProcessing.value = false;
     }

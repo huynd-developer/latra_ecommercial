@@ -7,6 +7,15 @@ const cartStore = useCartStore();
 
 const formatVND = (val: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
 
+// 1. THÊM HÀM XỬ LÝ ẢNH NÀY
+const getImageUrl = (path: string) => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path; // Giữ nguyên link Cloudinary
+  }
+  return `http://localhost:8080/uploads/${path}`; // Nối chuỗi nếu là file local
+};
+
 const updateQty = (newQty: number) => {
   if (newQty <= 0) {
     if(confirm('Bạn muốn xóa sản phẩm này khỏi giỏ?')) cartStore.removeItem(props.item.id);
@@ -23,8 +32,15 @@ const updateQty = (newQty: number) => {
       
       <div class="col-3 col-md-2">
         <div class="bg-light rounded-3 border d-flex justify-content-center align-items-center overflow-hidden ratio-1x1 p-2">
-          <img v-if="item.imageUrl" :src="`http://localhost:8080/uploads/${item.imageUrl}`" class="img-fluid mix-blend-multiply object-fit-contain" alt="Product">
+          
+          <img 
+            v-if="item.imageUrl" 
+            :src="getImageUrl(item.imageUrl)" 
+            class="img-fluid mix-blend-multiply object-fit-contain" 
+            alt="Product"
+          >
           <i v-else class="bi bi-image text-muted fs-3"></i>
+
         </div>
       </div>
 

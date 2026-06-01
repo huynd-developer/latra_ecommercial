@@ -57,7 +57,6 @@ const addVariant = () => formData.value.variants.push({ color: "", storage: "", 
 const removeVariant = (index: number) => formData.value.variants.splice(index, 1);
 
 const saveData = async () => {
-  // Bỏ qua logic validate chi tiết để rút gọn code hiển thị, bạn copy hàm saveData() TỐI ƯU CỦA BẠN VÀO ĐÂY nhé!
   const payload: ProductRequestDTO = {
     ...formData.value, brandId: Number(formData.value.brandId), categoryId: Number(formData.value.categoryId), status: Number(formData.value.status),
     variants: formData.value.variants.map((v) => ({ ...v, price: Number(v.price), stock: Number(v.stock), sku: v.sku.toUpperCase() }))
@@ -175,7 +174,7 @@ const saveData = async () => {
 
           <div class="mt-auto py-3 border-top bg-white d-flex justify-content-end gap-2 sticky-bottom">
             <button type="button" @click="emit('close')" class="btn btn-light px-4 py-2 rounded-pill fw-medium">Hủy bỏ</button>
-            <button type="submit" class="btn btn-dark px-5 py-2 rounded-pill fw-semibold">Lưu Hồ Sơ</button>
+            <button v-permission="['OWNER', 'MANAGER']" type="submit" class="btn btn-dark px-5 py-2 rounded-pill fw-semibold">Lưu Hồ Sơ</button>
           </div>
           
         </form>

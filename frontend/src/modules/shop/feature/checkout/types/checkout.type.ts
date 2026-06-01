@@ -17,7 +17,7 @@ export interface CheckoutFormState {
 }
 
 export interface CheckoutRequest {
-  userId: number; // BẮT BUỘC PHẢI CÓ ĐỂ FIX LỖI "ID MUST NOT BE NULL"
+  userId: number; 
   paymentMethod: 'COD' | 'VNPAY';
   shippingAddress: string;
   voucherCode: string | null;

@@ -7,7 +7,7 @@ import { productService } from "../services/productService";
 import type { Product } from "../types/product.type";
 import ProductList from "../components/ProductList.vue";
 import ProductModal from "../components/ProductModal.vue";
-import ProductImageModal from "../components/ProductImageModal.vue"; // Đã mở khóa
+import ProductImageModal from "../components/ProductImageModal.vue";
 
 const store = useProductStore();
 const router = useRouter();
@@ -72,7 +72,7 @@ const stopSelling = async (id: number) => {
         <div class="position-relative">
           <input v-model="searchQuery" type="text" class="form-control rounded-pill pe-5 bg-white border-light shadow-sm" placeholder="Tìm kiếm..." />
         </div>
-        <button @click="openAddModal" class="btn btn-dark rounded-pill px-4 fw-medium shadow-sm">
+        <button v-permission="['OWNER', 'MANAGER']" @click="openAddModal" class="btn btn-dark rounded-pill px-4 fw-medium shadow-sm">
           + Thêm Mới
         </button>
       </div>

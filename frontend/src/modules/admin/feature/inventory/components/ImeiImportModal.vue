@@ -1,9 +1,8 @@
-<!-- frontend/src/modules/admin/feature/inventory/components/ImeiImport.vue -->
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useAppStore } from '@/common/store/app.store';
 import { imeiService } from '../services/imeiService';
-import { useProductStore } from '../../product/stores/productStore'; // Tái sử dụng Product Store để lấy Variant
+import { useProductStore } from '../../product/stores/productStore';
 
 const emit = defineEmits<{ (e: 'imported'): void }>();
 const appStore = useAppStore();
@@ -16,8 +15,8 @@ const rawImeiInput = ref('');
 // Lấy danh sách variants phẳng (flat) từ products
 const flatVariants = computed(() => {
   const result: any[] = [];
-  productStore.products.forEach(p => {
-    p.variants.forEach(v => {
+  productStore.products?.forEach(p => {
+    p.variants?.forEach((v: any) => {
       result.push({ ...v, productId: p.id, productName: p.name });
     });
   });
@@ -36,6 +35,7 @@ const parsedImeis = computed(() => {
   const lines = rawImeiInput.value.split('\n').map(l => l.trim().toUpperCase()).filter(l => l !== '');
   return [...new Set(lines)]; // Khử trùng
 });
+
 const duplicateCount = computed(() => {
   const rawCount = rawImeiInput.value.split('\n').filter(l => l.trim() !== '').length;
   return rawCount - parsedImeis.value.length;
@@ -63,13 +63,12 @@ const submitImport = async () => {
 };
 
 onMounted(() => {
-  if (productStore.products.length === 0) productStore.fetchProducts();
+  if (productStore.products?.length === 0) productStore.fetchProducts();
 });
 </script>
 
 <template>
   <div class="row h-100">
-    <!-- Cột trái: Form chọn thông tin -->
     <div class="col-md-5 border-end pe-4">
       <h6 class="fw-bold mb-4">1. Thông tin sản phẩm</h6>
       
@@ -96,7 +95,6 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Cột phải: Textarea quét súng -->
     <div class="col-md-7 ps-4 d-flex flex-column">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h6 class="fw-bold mb-0">2. Quét mã IMEI (Bắn Barcode)</h6>

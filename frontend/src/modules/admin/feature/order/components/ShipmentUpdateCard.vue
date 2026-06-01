@@ -1,6 +1,5 @@
-<!-- frontend/src/modules/admin/feature/order/components/ShipmentUpdateCard.vue -->
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue'; // 🛠️ Đã gom gọn import computed lên đầu
 import { useAppStore } from '@/common/store/app.store';
 import { orderAdminService } from '../services/orderAdminService';
 import type { Shipment, UpdateShipmentRequestDTO } from '../types/order.type';
@@ -8,6 +7,20 @@ import type { Shipment, UpdateShipmentRequestDTO } from '../types/order.type';
 const props = defineProps<{ shipment: Shipment; orderId: number }>();
 const emit = defineEmits<{ (e: 'updated'): void }>();
 const appStore = useAppStore();
+
+// 🛠️ Hàm check quyền lấy trực tiếp từ localStorage đồng bộ với Directive
+const isManagerOrOwner = computed(() => {
+  const userRawData = localStorage.getItem('currentUser');
+  if (!userRawData) return false;
+  try {
+    const parsedUser = JSON.parse(userRawData);
+    let role = parsedUser.role || parsedUser.roles?.[0] || parsedUser.authorities?.[0]?.authority || parsedUser.authorities?.[0] || '';
+    role = typeof role === 'string' ? role.toUpperCase().replace('ROLE_', '') : '';
+    return ['MANAGER', 'OWNER'].includes(role);
+  } catch (e) {
+    return false;
+  }
+});
 
 const formData = ref<UpdateShipmentRequestDTO>({
   carrier: '', trackingCode: '', status: 'PREPARING'
@@ -34,7 +47,7 @@ const saveShipment = async () => {
     appStore.startLoading();
     await orderAdminService.updateShipment(props.shipment.id, formData.value);
     appStore.notifySuccess('Cập nhật vận đơn thành công!');
-    emit('updated'); // Load lại đơn hàng (vì OrderStatus tự động chạy theo ShipmentStatus từ BE)
+    emit('updated'); 
   } catch (err: any) {
     appStore.notifyError(err.response?.data?.message || 'Lỗi cập nhật vận chuyển');
   } finally {
@@ -63,11 +76,14 @@ const saveAddress = async () => {
       <i class="bi bi-truck text-primary me-2"></i> Thông tin Vận chuyển
     </div>
     <div class="card-body">
-      <!-- Cập nhật trạng thái Giao hàng -->
       <div class="row mb-4">
         <div class="col-md-4">
           <label class="form-label small fw-bold">Trạng thái Giao hàng</label>
-          <select v-model="formData.status" class="form-select form-select-sm shadow-none font-bold text-primary">
+          <select 
+            v-model="formData.status" 
+            :disabled="!isManagerOrOwner" 
+            class="form-select form-select-sm shadow-none font-bold text-primary"
+          >
             <option value="PREPARING">Đang chuẩn bị hàng</option>
             <option value="PICKING">Shipper đang lấy hàng</option>
             <option value="DELIVERING">Đang giao hàng</option>
@@ -78,7 +94,11 @@ const saveAddress = async () => {
         </div>
         <div class="col-md-4">
           <label class="form-label small fw-bold">Đơn vị vận chuyển</label>
-          <select v-model="formData.carrier" class="form-select form-select-sm shadow-none">
+          <select 
+            v-model="formData.carrier" 
+            :disabled="!isManagerOrOwner" 
+            class="form-select form-select-sm shadow-none"
+          >
             <option value="">-- Chọn Hãng --</option>
             <option value="GHTK">Giao Hàng Tiết Kiệm</option>
             <option value="GHN">Giao Hàng Nhanh</option>
@@ -89,17 +109,34 @@ const saveAddress = async () => {
         <div class="col-md-4">
           <label class="form-label small fw-bold">Mã Vận Đơn (Tracking)</label>
           <div class="d-flex gap-2">
-            <input v-model="formData.trackingCode" type="text" class="form-control form-control-sm font-monospace" placeholder="Nhập mã...">
-            <button @click="saveShipment" class="btn btn-sm btn-dark text-nowrap">Lưu Vận Đơn</button>
+            <input 
+              v-model="formData.trackingCode" 
+              :disabled="!isManagerOrOwner" 
+              type="text" 
+              class="form-control form-control-sm font-monospace" 
+              placeholder="Nhập mã..."
+            >
+            <button 
+              v-permission="['MANAGER', 'OWNER']" 
+              @click="saveShipment" 
+              class="btn btn-sm btn-dark text-nowrap"
+            >
+              Lưu Vận Đơn
+            </button>
           </div>
         </div>
       </div>
 
-      <!-- Đổi địa chỉ khách (Chỉ cho phép khi đang PREPARING) -->
       <div class="border-top pt-3">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <label class="form-label small fw-bold mb-0">Địa chỉ nhận hàng (Của Khách)</label>
-          <button v-if="!isEditAddress" @click="isEditAddress = true" class="btn btn-sm btn-link text-decoration-none p-0" :disabled="shipment.status !== 'PREPARING'">
+          <button 
+            v-permission="['MANAGER', 'OWNER']" 
+            v-if="!isEditAddress" 
+            @click="isEditAddress = true" 
+            class="btn btn-sm btn-link text-decoration-none p-0" 
+            :disabled="shipment.status !== 'PREPARING'"
+          >
             <i class="bi bi-pencil-square"></i> Đổi địa chỉ
           </button>
         </div>

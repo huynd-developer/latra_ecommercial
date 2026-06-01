@@ -1,84 +1,101 @@
-// frontend/src/modules/admin/layout/TopHeader.vue
 <template>
-  <header class="top-nav-glass sticky-top d-flex align-items-center justify-content-between px-3 z-3 shadow-sm">
-    
-    <!-- KHU VỰC LOGO -->
-    <div class="d-flex align-items-center gap-2 flex-shrink-0">
-      <div class="bg-dark-peel text-white rounded-3 d-flex align-items-center justify-content-center shadow-peel logo-box">
-        <i class="bi bi-layers-fill fs-6"></i>
-      </div>
-      <h5 class="fw-black mb-0 text-slate-800 tracking-tight d-none d-md-block" style="letter-spacing: 0.5px;">LATRA</h5>
-    </div>
-
-    <!-- KHU VỰC MENU (CÓ THỂ CUỘN NGANG) -->
-    <div class="menu-scroll-container d-flex align-items-center gap-1 bg-slate-100 p-1 rounded-pill border border-slate-200 shadow-sm mx-3">
-      <!-- Nút cứng: Bán hàng -->
-      <router-link to="/admin/pos" class="btn nav-pill transition-all fw-semibold text-decoration-none text-nowrap" :class="isActive('/admin/pos') ? 'active bg-dark-peel text-white shadow-peel' : 'text-slate-500 hover-text-dark'">
-        <i class="bi bi-cart3 me-1"></i> Bán hàng
-      </router-link>
+  <header class="top-nav-glass sticky-top shadow-sm" style="z-index: 1050;">
+    <div class="container-xl d-flex align-items-center justify-content-between h-100 px-3">
       
-      <!-- Nút cứng: Tổng quan -->
-      <router-link to="/admin/dashboard" class="btn nav-pill transition-all fw-semibold text-decoration-none text-nowrap" :class="isActive('/admin/dashboard') ? 'active bg-dark-peel text-white shadow-peel' : 'text-slate-500 hover-text-dark'">
-        <i class="bi bi-grid-1x2 me-1"></i> Tổng quan
-      </router-link>
-      
-      <!-- Render động các menu còn lại -->
-      <router-link 
-        v-for="item in menuItems" 
-        :key="item.id" 
-        :to="item.path" 
-        class="btn nav-pill transition-all fw-semibold text-decoration-none text-nowrap" 
-        :class="isActive(item.path) ? 'active bg-dark-peel text-white shadow-peel' : 'text-slate-500 hover-text-dark'"
-      >
-        <i :class="item.icon" class="me-1"></i> {{ item.name }}
-      </router-link>
-    </div>
-
-    <!-- KHU VỰC TIỆN ÍCH -->
-    <div class="d-flex align-items-center gap-2 flex-shrink-0">
-      <!-- Đồng hồ (Ẩn trên màn hình nhỏ) -->
-      <div class="text-slate-500 fw-medium d-none d-lg-flex align-items-center gap-2 bg-white px-3 py-2 rounded-pill shadow-sm border border-slate-100 time-box">
-        <i class="bi bi-clock text-dark-peel"></i> {{ currentTime }}
-      </div>
-      
-      <!-- Nút Avatar User -->
-      <div class="position-relative">
-        <div @click.stop="toggleProfile" class="bg-dark-peel text-white rounded-circle fw-bold d-flex align-items-center justify-content-center shadow-peel cursor-pointer hover-lift avatar-box">
-          AD
+      <div class="d-flex align-items-center gap-2 flex-shrink-0">
+        <div class="bg-dark-peel text-white rounded-3 d-flex align-items-center justify-content-center shadow-peel logo-box">
+          <i class="bi bi-layers-fill fs-6"></i>
         </div>
+        <h5 class="fw-black mb-0 text-slate-800 tracking-tight d-none d-md-block" style="letter-spacing: 0.5px;">LATRA</h5>
+      </div>
 
-        <!-- Dropdown Menu -->
-        <div v-if="showProfile" @click.stop class="dropdown-menu-custom position-absolute end-0 mt-2 bg-white rounded-4 shadow-lg border border-slate-100 overflow-hidden animate__animated animate__fadeIn animate__faster z-3" style="width: 260px;">
+      <div class="menu-scroll-container d-flex align-items-center gap-1 bg-slate-100 p-1 rounded-pill border border-slate-200 shadow-sm mx-3">
+        <template v-for="item in filteredMenuItems" :key="item.id">
           
-          <div class="p-3 border-bottom border-slate-100 bg-slate-50 d-flex gap-3 align-items-center">
-            <div class="bg-dark-peel text-white rounded-circle fw-bold d-flex align-items-center justify-content-center flex-shrink-0 avatar-large">AD</div>
-            <div>
-              <h6 class="mb-0 fw-bold text-slate-800" style="font-size: 0.9rem;">Quản Trị Viên</h6>
-              <div class="text-slate-500" style="font-size: 0.75rem;">admin@latra.com</div>
+          <router-link 
+            v-if="!item.children"
+            :to="item.path" 
+            class="btn nav-pill transition-all fw-semibold text-decoration-none text-nowrap" 
+            :class="isActive(item.path) ? 'active bg-dark-peel text-white shadow-peel' : 'text-slate-500 hover-text-dark'"
+          >
+            <i :class="item.icon" class="me-1"></i> {{ item.name }}
+          </router-link>
+
+          <div 
+            v-else 
+            class="dropdown-hover-container position-relative"
+            @mouseenter="activeHoverMenu = item.id"
+            @mouseleave="activeHoverMenu = null"
+          >
+            <div 
+              class="btn nav-pill transition-all fw-semibold text-decoration-none text-nowrap d-flex align-items-center gap-1 cursor-pointer" 
+              :class="isGroupActive(item) ? 'active bg-dark-peel text-white shadow-peel' : 'text-slate-500 hover-text-dark'"
+            >
+              <i :class="item.icon"></i> {{ item.name }} <i class="bi bi-chevron-down ms-1" style="font-size: 0.7rem;"></i>
+            </div>
+            
+            <div 
+              class="dropdown-hover-menu position-absolute top-100 bg-white rounded-4 shadow-lg border border-slate-100 overflow-hidden pt-1 pb-1 px-1"
+              :class="[
+                item.id === 'system' || item.id === 'promotions-group' ? 'end-0' : 'start-0',
+                { 'is-open': activeHoverMenu === item.id }
+              ]"
+              style="z-index: 1100;"
+            >
+              <router-link 
+                v-for="child in item.children" 
+                :key="child.id" 
+                :to="child.path" 
+                @click="activeHoverMenu = null"
+                class="dropdown-item-custom d-flex align-items-center gap-2 p-2 rounded-3 fw-medium text-decoration-none transition-all mb-1 text-nowrap"
+                :class="{ 'active-child': isActive(child.path) }"
+              >
+                <i :class="child.icon" class="dropdown-icon"></i> {{ child.name }}
+              </router-link>
             </div>
           </div>
-          
-          <div class="p-2">
-            <button class="dropdown-item-custom w-100 text-start bg-transparent border-0 p-2 rounded-3 text-slate-700 fw-medium mb-1">
-              <i class="bi bi-person me-2"></i> Hồ sơ cá nhân
-            </button>
-            <button class="dropdown-item-custom w-100 text-start bg-transparent border-0 p-2 rounded-3 text-slate-700 fw-medium mb-1">
-              <i class="bi bi-shield-lock me-2"></i> Đổi mật khẩu
-            </button>
-            
-            <hr class="my-1 border-slate-200">
-            
-            <button @click="handleShiftHandover" class="dropdown-item-custom w-100 text-start bg-transparent border-0 p-2 rounded-3 text-slate-700 fw-bold mb-1" style="color: #0284c7 !important;">
-              <i class="bi bi-clock-history me-2"></i> Bàn giao ca làm việc
-            </button>
-          </div>
-          
-          <div class="p-2 border-top border-slate-100">
-            <button @click="handleLogout" class="dropdown-item-custom w-100 text-start bg-transparent border-0 p-2 rounded-3 text-danger fw-bold">
-              <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
-            </button>
+
+        </template>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 flex-shrink-0">
+        <div class="text-slate-500 fw-medium d-none d-lg-flex align-items-center gap-2 bg-white px-3 py-2 rounded-pill shadow-sm border border-slate-100 time-box">
+          <i class="bi bi-clock text-dark-peel"></i> {{ currentTime }}
+        </div>
+        
+        <div class="position-relative">
+          <div @click.stop="toggleProfile" class="bg-dark-peel text-white rounded-circle fw-bold d-flex align-items-center justify-content-center shadow-peel cursor-pointer hover-lift avatar-box">
+            {{ userAvatar }}
           </div>
 
+          <div v-if="showProfile" @click.stop class="dropdown-menu-custom position-absolute end-0 mt-2 bg-white rounded-4 shadow-lg border border-slate-100 overflow-hidden animate__animated animate__fadeIn animate__faster" style="z-index: 1100; width: 260px;">
+            <div class="p-3 border-bottom border-slate-100 bg-slate-50 d-flex gap-3 align-items-center">
+              <div class="bg-dark-peel text-white rounded-circle fw-bold d-flex align-items-center justify-content-center flex-shrink-0 avatar-large">{{ userAvatar }}</div>
+              <div>
+                <h6 class="mb-0 fw-bold text-slate-800" style="font-size: 0.9rem;">{{ userDisplayName }}</h6>
+                <div class="text-slate-500" style="font-size: 0.75rem;">{{ userRoleDisplay }}</div>
+              </div>
+            </div>
+            
+            <div class="p-2">
+              <button class="dropdown-item-custom-btn w-100 text-start bg-transparent border-0 p-2 rounded-3 text-slate-700 fw-medium mb-1">
+                <i class="bi bi-person me-2"></i> Hồ sơ cá nhân
+              </button>
+              <button class="dropdown-item-custom-btn w-100 text-start bg-transparent border-0 p-2 rounded-3 text-slate-700 fw-medium mb-1">
+                <i class="bi bi-shield-lock me-2"></i> Đổi mật khẩu
+              </button>
+              <hr class="my-1 border-slate-200">
+              <button @click="handleShiftHandover" class="dropdown-item-custom-btn w-100 text-start bg-transparent border-0 p-2 rounded-3 text-slate-700 fw-bold mb-1" style="color: #0284c7 !important;">
+                <i class="bi bi-clock-history me-2"></i> Bàn giao ca làm việc
+              </button>
+            </div>
+            
+            <div class="p-2 border-top border-slate-100">
+              <button @click="handleLogout" class="dropdown-item-custom-btn w-100 text-start bg-transparent border-0 p-2 rounded-3 text-danger fw-bold">
+                <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -87,51 +104,134 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router' 
-import axios from 'axios' 
+import request from '@/common/services/request' 
 import Swal from 'sweetalert2'
 
-// Đã loại bỏ defineProps activeTab vì không cần thiết nữa.
 const router = useRouter() 
-const route = useRoute() // Dùng để bắt active state
+const route = useRoute() 
 const currentTime = ref('')
 
-// Hàm kiểm tra xem URL hiện tại có khớp với path của menu không
+const currentUser = ref(JSON.parse(localStorage.getItem('currentUser') || '{}'))
+
+// Chuẩn hóa role từ BE gửi về (Bỏ ROLE_)
+const userRole = computed(() => {
+  const rawRole = currentUser.value.role || currentUser.value.roles?.[0] || '';
+  return rawRole.toUpperCase().replace('ROLE_', '') || 'USER';
+})
+
+const userAvatar = computed(() => {
+  const name = currentUser.value.fullName || currentUser.value.username || 'AD'
+  return name.substring(0, 2).toUpperCase()
+})
+const userDisplayName = computed(() => currentUser.value.fullName || currentUser.value.username || 'Người Dùng')
+
+// ĐỒNG BỘ: Sửa đổi hiển thị hiển thị chức danh từ ADMIN sang CASHIER
+const userRoleDisplay = computed(() => {
+  if (userRole.value === 'OWNER') return 'Chủ Hệ Thống (Owner)'
+  if (userRole.value === 'MANAGER') return 'Quản Lý Cửa Hàng (Manager)'
+  if (userRole.value === 'CASHIER') return 'Thu Ngân (Cashier)'
+  return 'Khách Hàng'
+})
+
+const activeHoverMenu = ref<string | null>(null)
+
 const isActive = (path: string) => {
+  if (!path) return false;
   return route.path.startsWith(path)
 }
 
-// BỔ SUNG ĐẦY ĐỦ CÁC MENU ADMIN TẠI ĐÂY
+const isGroupActive = (group: any) => {
+  return group.children?.some((child: any) => isActive(child.path))
+}
+
+// 🛠️ BẢNG MA TRẬN PHÂN QUYỀN (ĐÃ FIX LOGIC THỰC TẾ)
+// 🛠️ BẢNG MA TRẬN PHÂN QUYỀN ĐÃ ĐỒNG BỘ 100% VỚI ROUTER.TS
 const menuItems = [
-  { id: 'orders', path: '/admin/orders', name: 'Đơn hàng', icon: 'bi-receipt' },
-  { id: 'products', path: '/admin/products', name: 'Sản phẩm', icon: 'bi-box-seam' },
-  { id: 'categories', path: '/admin/categories', name: 'Danh mục', icon: 'bi-tags' },
-  { id: 'brands', path: '/admin/brands', name: 'Thương hiệu', icon: 'bi-award' },
-  { id: 'imeis', path: '/admin/imeis', name: 'Kho IMEI', icon: 'bi-upc-scan' },
-  { id: 'promotions', path: '/admin/promotions', name: 'Voucher', icon: 'bi-ticket-perforated' }, 
-  { id: 'flash-sale', path: '/admin/flash-sale', name: 'Flash Sale', icon: 'bi-lightning-charge' }, 
-  { id: 'khach-hang', path: '/admin/khach-hang', name: 'Khách hàng', icon: 'bi-people' }, 
-  { id: 'nhan-vien', path: '/admin/nhan-vien', name: 'Nhân viên', icon: 'bi-person-badge' }, 
-  { id: 'settings', path: '/admin/settings', name: 'Cài đặt', icon: 'bi-gear' },
+  { id: 'pos', path: '/admin/pos', name: 'Bán hàng', icon: 'bi-cart3', roles: ['OWNER', 'MANAGER', 'CASHIER'] },
+  { id: 'dashboard', path: '/admin/dashboard', name: 'Tổng quan', icon: 'bi-grid-1x2', roles: ['OWNER', 'MANAGER'] },
+  { id: 'orders', path: '/admin/orders', name: 'Đơn hàng', icon: 'bi-receipt', roles: ['OWNER', 'MANAGER', 'CASHIER'] }, 
+  
+  { 
+    id: 'catalog', 
+    name: 'Sản phẩm', 
+    icon: 'bi-box-seam',
+    // ĐÃ SỬA: Cấp quyền cho CASHIER thấy menu cha để mở dropdown
+    roles: ['OWNER', 'MANAGER', 'CASHIER'], 
+    children: [
+      { id: 'products', path: '/admin/products', name: 'Danh sách SP', icon: 'bi-box', roles: ['OWNER', 'MANAGER'] },
+      { id: 'categories', path: '/admin/categories', name: 'Danh mục', icon: 'bi-tags', roles: ['OWNER', 'MANAGER'] },
+      { id: 'brands', path: '/admin/brands', name: 'Thương hiệu', icon: 'bi-award', roles: ['OWNER', 'MANAGER'] },
+      // ĐÃ SỬA: Đồng bộ Router, cho phép CASHIER vào Kho IMEI
+      { id: 'imeis', path: '/admin/imeis', name: 'Kho IMEI', icon: 'bi-upc-scan', roles: ['OWNER', 'MANAGER', 'CASHIER'] },
+    ]
+  },
+  { 
+    id: 'promotions-group', 
+    name: 'Khuyến mãi', 
+    icon: 'bi-ticket-perforated',
+    roles: ['OWNER', 'MANAGER', 'CASHIER'], 
+    children: [
+      { id: 'promotions', path: '/admin/promotions', name: 'Voucher', icon: 'bi-percent', roles: ['OWNER', 'MANAGER', 'CASHIER'] },
+      { id: 'flash-sale', path: '/admin/flash-sale', name: 'Flash Sale', icon: 'bi-lightning-charge', roles: ['OWNER', 'MANAGER'] },
+    ]
+  },
+  { 
+    id: 'system', 
+    name: 'Hệ thống', 
+    icon: 'bi-gear',
+    // ĐÃ SỬA: Cấp quyền cho CASHIER thấy menu cha để mở dropdown
+    roles: ['OWNER', 'MANAGER', 'CASHIER'], 
+    children: [
+      // ĐÃ SỬA: Đồng bộ Router, cho phép CASHIER vào quản lý Khách hàng
+      { id: 'customers', path: '/admin/customers', name: 'Khách hàng', icon: 'bi-people', roles: ['OWNER', 'MANAGER', 'CASHIER'] },
+      { id: 'employees', path: '/admin/employees', name: 'Nhân viên', icon: 'bi-person-badge', roles: ['OWNER'] }, 
+      { id: 'settings', path: '/admin/settings', name: 'Cài đặt', icon: 'bi-sliders', roles: ['OWNER'] },       
+    ]
+  }
 ]
 
-// --- QUẢN LÝ ẨN HIỆN MENU ---
+const filteredMenuItems = computed(() => {
+  return menuItems.reduce((acc: any[], item) => {
+    if (item.roles.includes(userRole.value)) {
+      if (item.children) {
+        const filteredChildren = item.children.filter(child => child.roles.includes(userRole.value));
+        if (filteredChildren.length > 0) {
+          acc.push({ ...item, children: filteredChildren });
+        }
+      } else {
+        acc.push(item);
+      }
+    }
+    return acc;
+  }, []);
+});
+
 const showProfile = ref(false)
 const toggleProfile = () => { showProfile.value = !showProfile.value }
-const closeAllMenus = () => { showProfile.value = false }
+const closeAllMenus = () => { 
+  showProfile.value = false 
+  activeHoverMenu.value = null
+}
 
-// --- TÍNH NĂNG CHỐT CA / BÀN GIAO CA ---
 const handleShiftHandover = async () => {
   showProfile.value = false 
   try {
-    const res = await axios.get('http://localhost:8080/api/v1/shifts/summary?userId=1')
+    // 🛠️ ĐÃ SỬA: Lấy ID thật của nhân viên đang đăng nhập, fallback về 0 nếu lỗi
+    const userId = currentUser.value.id || currentUser.value.userId || 0; 
+    
+    if (!userId) {
+       return Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không xác định được danh tính nhân viên!' })
+    }
+
+    const res = await request.get(`/shifts/summary?userId=${userId}`)
     const data = res.data
-    const formattedRevenue = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.totalRevenue)
+    const formattedRevenue = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.totalRevenue || 0)
 
     Swal.fire({
       title: 'Tổng kết ca làm việc',
-      html: `...`, // Giữ nguyên code cũ của bạn, tôi rút gọn ở đây để dễ nhìn
+      html: `Doanh thu trong ca: <b>${formattedRevenue}</b><br/>Xác nhận bàn giao?`, 
       icon: 'info',
       showCancelButton: true,
       confirmButtonColor: '#111111',
@@ -141,15 +241,19 @@ const handleShiftHandover = async () => {
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire({ icon: 'success', title: 'Chốt ca thành công!', text: 'Phiếu bàn giao đang được in...', timer: 2000, showConfirmButton: false })
-        setTimeout(() => { router.push('/login') }, 2000)
+        setTimeout(() => { 
+            // 🛠️ Thực tế: Khi chốt ca xong phải clear token để người khác vào ca mới đăng nhập
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("currentUser");
+            router.push('/login'); 
+        }, 2000)
       }
     })
   } catch (error) {
-    Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể kết nối đến máy chủ! Vui lòng kiểm tra lại Spring Boot.' })
+    Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể kết nối đến máy chủ hoặc phiên làm việc đã hết hạn.' })
   }
 }
 
-// --- ĐĂNG XUẤT ---
 const handleLogout = () => {
   showProfile.value = false
   Swal.fire({
@@ -163,15 +267,17 @@ const handleLogout = () => {
     cancelButtonText: 'Hủy'
   }).then((result) => {
     if (result.isConfirmed) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("currentUser");
+      
       Swal.fire({ icon: 'success', title: 'Đã đăng xuất', timer: 1500, showConfirmButton: false })
       router.push('/login') 
     }
   })
 }
 
-// --- LIFECYCLE ---
 let timer: ReturnType<typeof setInterval>;
-
 onMounted(() => {
   const updateClock = () => {
     const now = new Date()
@@ -190,35 +296,9 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* NAV CHÍNH */
-.top-nav-glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  height: 64px; /* Giảm chiều cao header một chút cho thanh thoát */
-}
-
-/* KHU VỰC MENU CUỘN NGANG - CHÌA KHÓA FIX VỠ LAYOUT */
-.menu-scroll-container {
-  max-width: 65vw; /* Giới hạn độ rộng để không chèn ép 2 bên */
-  overflow-x: auto; /* Cho phép cuộn ngang */
-  scrollbar-width: none; /* Ẩn scrollbar trên Firefox */
-  -ms-overflow-style: none; /* Ẩn scrollbar trên IE/Edge */
-}
-.menu-scroll-container::-webkit-scrollbar {
-  display: none; /* Ẩn scrollbar trên Chrome/Safari */
-}
-
-/* THU NHỎ SIZE VÀ PADDING CỦA NÚT */
-.nav-pill { 
-  color: #64748b; 
-  border-radius: 50px; 
-  padding: 5px 12px; /* Giảm padding */
-  font-size: 0.8rem; /* Thu nhỏ font chữ */
-  border: none; 
-  background: transparent; 
-}
+.top-nav-glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.3); height: 64px; }
+.menu-scroll-container { overflow: visible !important; }
+.nav-pill { color: #64748b; border-radius: 50px; padding: 5px 14px; font-size: 0.8rem; border: none; background: transparent; }
 .nav-pill.active { background-color: #111111 !important; color: #ffffff !important; }
 .hover-text-dark:hover { color: #1e293b !important; }
 .shadow-peel { box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.1); }
@@ -227,19 +307,22 @@ onUnmounted(() => {
 .bg-dark-peel { background-color: #111111 !important; }
 .text-dark-peel { color: #111111 !important; }
 .cursor-pointer { cursor: pointer; }
-
-/* KÍCH THƯỚC CỐ ĐỊNH CHO ICON & ĐỒNG HỒ */
 .logo-box { width: 32px; height: 32px; }
 .avatar-box { width: 36px; height: 36px; font-size: 0.85rem; }
 .avatar-large { width: 45px; height: 45px; }
 .time-box { font-size: 0.8rem; }
-
-/* MENU DROPDOWN */
-.dropdown-menu-custom {
-  transform-origin: top right;
-  z-index: 1050;
-}
-.dropdown-item-custom { transition: background-color 0.2s; font-size: 0.85rem; }
-.dropdown-item-custom:hover { background-color: #f1f5f9 !important; }
+.dropdown-hover-container { display: flex; align-items: center; height: 100%; }
+.dropdown-hover-menu { opacity: 0; visibility: hidden; transform: translateY(10px); min-width: 170px; transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out, visibility 0.15s; margin-top: 8px; }
+.dropdown-hover-menu::before { content: ""; position: absolute; top: -25px; left: 0; right: 0; height: 25px; background: transparent; }
+.dropdown-hover-menu.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
+.dropdown-item-custom { font-size: 0.85rem; color: #475569 !important; transition: all 0.15s ease-in-out; }
+.dropdown-icon { color: #94a3b8 !important; font-size: 0.95rem; width: 20px; }
+.dropdown-item-custom:hover { background-color: #f1f5f9 !important; color: #111111 !important; }
+.dropdown-item-custom:hover .dropdown-icon { color: #111111 !important; }
+.active-child { background-color: #f1f5f9 !important; color: #111111 !important; font-weight: 700 !important; }
+.active-child .dropdown-icon { color: #111111 !important; }
+.dropdown-menu-custom { transform-origin: top right; }
+.dropdown-item-custom-btn { transition: background-color 0.2s; font-size: 0.85rem; }
+.dropdown-item-custom-btn:hover { background-color: #f1f5f9 !important; }
 .animate__faster { animation-duration: 0.2s; }
 </style>

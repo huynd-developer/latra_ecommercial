@@ -64,13 +64,15 @@ const getImageUrl = (url: string) => {
             <span v-else class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-2 fw-normal">Ngừng bán</span>
           </td>
           <td class="text-end pe-4 py-3 border-bottom border-light">
-            <button @click="emit('upload-image', product)" class="btn btn-sm btn-light rounded-circle p-2 mx-1 text-primary" title="Tải ảnh">
+            <button v-permission="['OWNER', 'MANAGER']" @click="emit('upload-image', product)" class="btn btn-sm btn-light rounded-circle p-2 mx-1 text-primary" title="Tải ảnh">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
             </button>
-            <button @click="emit('edit', product)" class="btn btn-sm btn-light rounded-circle p-2 mx-1 text-dark" title="Sửa">
+            
+            <button v-permission="['OWNER', 'MANAGER']" @click="emit('edit', product)" class="btn btn-sm btn-light rounded-circle p-2 mx-1 text-dark" title="Sửa">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
             </button>
-            <button v-if="product.status === 1" @click="emit('stop-selling', product.id)" class="btn btn-sm btn-light rounded-circle p-2 mx-1 text-danger" title="Tạm ngừng">
+            
+            <button v-permission="['OWNER']" v-if="product.status === 1" @click="emit('stop-selling', product.id)" class="btn btn-sm btn-light rounded-circle p-2 mx-1 text-danger" title="Tạm ngừng">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
             </button>
           </td>

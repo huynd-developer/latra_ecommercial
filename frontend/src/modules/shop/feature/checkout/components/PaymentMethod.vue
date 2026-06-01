@@ -4,8 +4,8 @@ const checkoutStore = useCheckoutStore();
 </script>
 
 <template>
-  <div class="bg-white p-4 p-lg-5 rounded-4 shadow-sm mb-4">
-    <h4 class="fw-bold mb-4">Phương thức thanh toán</h4>
+  <div v-if="checkoutStore?.formState" class="bg-white p-4 p-lg-5 rounded-4 shadow-sm mb-4 border border-slate-200">
+    <h4 class="fw-bold mb-4 text-dark">Phương thức thanh toán</h4>
     
     <div class="form-check mb-3 p-3 border rounded-3 transition-all cursor-pointer" 
          :class="{'border-primary bg-primary bg-opacity-10': checkoutStore.formState.paymentMethod === 'COD'}"
