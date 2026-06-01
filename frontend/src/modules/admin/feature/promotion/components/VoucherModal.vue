@@ -1,9 +1,9 @@
-<!-- frontend/src/modules/admin/feature/promotion/components/VoucherModal.vue -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useAppStore } from "@/common/store/app.store";
 import { promotionService } from "../services/promotionService";
 import type { Voucher } from "../types/promotion.type";
+import { ROLES } from "@/common/constants/permissions"; // 🔑 Import cấu hình Role
 
 const props = defineProps<{ voucherSelected: Voucher | null }>();
 const emit = defineEmits<{ (e: "close"): void; (e: "refresh"): void; }>();
@@ -77,81 +77,123 @@ const saveData = async () => {
 </script>
 
 <template>
-  <div>
-    <div class="offcanvas-backdrop fade show" @click="emit('close')"></div>
-    <div class="offcanvas offcanvas-end show shadow-lg border-0" tabindex="-1" style="visibility: visible; width: 600px; max-width: 100vw;">
-      <div class="offcanvas-header border-bottom px-4 py-3 bg-light bg-opacity-50">
-        <h5 class="offcanvas-title fw-semibold">{{ isEdit ? "Cập Nhật Voucher" : "Tạo Mã Voucher Mới" }}</h5>
-        <button type="button" class="btn-close" @click="emit('close')"></button>
-      </div>
+  <div class="modal fade show d-block custom-backdrop" tabindex="-1" @click.self="emit('close')">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 700px;">
+      
+      <form @submit.prevent="saveData" novalidate class="modal-content shadow-lg border-0 rounded-4 overflow-hidden">
+        
+        <div class="modal-header border-bottom px-4 py-3 bg-light bg-opacity-75">
+          <h5 class="modal-title fw-semibold text-dark">
+            {{ isEdit ? "Cập Nhật Voucher" : "Tạo Mã Voucher Mới" }}
+          </h5>
+          <button type="button" class="btn-close shadow-none" @click="emit('close')"></button>
+        </div>
 
-      <div class="offcanvas-body px-4 p-0 custom-scrollbar d-flex flex-column bg-light bg-opacity-25">
-        <!-- Đã thêm novalidate -->
-        <form @submit.prevent="saveData" novalidate class="d-flex flex-column h-100">
+        <div class="modal-body p-4 bg-light bg-opacity-25 custom-scrollbar">
           
-          <div class="flex-grow-1 pb-5">
-            <div class="bg-white rounded-4 border p-4 mb-4 mt-3 shadow-sm">
-              <h6 class="fw-semibold text-dark mb-3">Định dạng mã</h6>
-              <div class="mb-3">
-                <label class="form-label small fw-medium text-muted mb-1">Mã Voucher (Code) <span class="text-danger">*</span></label>
-                <input v-model="formData.code" class="form-control bg-light border-0 py-2 text-uppercase fw-bold text-primary" placeholder="VD: TET2026, FREESHIP..." />
-              </div>
+          <div class="bg-white rounded-4 border p-4 mb-4 shadow-sm">
+            <h6 class="fw-semibold text-dark mb-3">Định dạng mã</h6>
+            <div class="mb-2">
+              <label class="form-label small fw-medium text-muted mb-1">Mã Voucher (Code) <span class="text-danger">*</span></label>
+              <input v-model="formData.code" class="form-control bg-light border-0 py-2 text-uppercase fw-bold text-primary custom-focus" placeholder="VD: TET2026, FREESHIP..." />
             </div>
+          </div>
 
-            <div class="bg-white rounded-4 border p-4 mb-4 shadow-sm">
-              <h6 class="fw-semibold text-dark mb-3">Thiết lập giảm giá</h6>
-              <div class="row g-3">
-                <!-- (Giữ nguyên form nhập giá tiền) -->
-                <div class="col-md-6">
-                  <label class="form-label small fw-medium text-muted mb-1">Loại Giảm</label>
-                  <select v-model="formData.discountType" class="form-select bg-light border-0 py-2">
-                    <option value="PERCENTAGE">Giảm theo phần trăm (%)</option>
-                    <option value="FIXED_AMOUNT">Giảm tiền mặt trực tiếp</option>
-                  </select>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-medium text-muted mb-1">Giá trị giảm <span class="text-danger">*</span></label>
-                  <input v-model.number="formData.value" type="number" min="1" class="form-control bg-light border-0 py-2 fw-bold text-success" />
-                </div>
-                
-                <div class="col-md-6">
-                  <label class="form-label small fw-medium text-muted mb-1">Giá trị đơn tối thiểu <span class="text-danger">*</span></label>
-                  <input v-model.number="formData.minOrderValue" type="number" min="0" class="form-control bg-light border-0 py-2" placeholder="0 = Áp dụng mọi đơn" />
-                </div>
-                <div class="col-md-6" v-if="formData.discountType === 'PERCENTAGE'">
-                  <label class="form-label small fw-medium text-muted mb-1">Mức giảm tối đa <span class="text-danger">*</span></label>
-                  <input v-model.number="formData.maxDiscountAmount" type="number" min="1" class="form-control bg-light border-0 py-2" />
-                </div>
+          <div class="bg-white rounded-4 border p-4 mb-4 shadow-sm">
+            <h6 class="fw-semibold text-dark mb-3">Thiết lập giảm giá</h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-medium text-muted mb-1">Loại Giảm</label>
+                <select v-model="formData.discountType" class="form-select bg-light border-0 py-2 custom-focus">
+                  <option value="PERCENTAGE">Giảm theo phần trăm (%)</option>
+                  <option value="FIXED_AMOUNT">Giảm tiền mặt trực tiếp</option>
+                </select>
               </div>
-            </div>
-
-            <div class="bg-white rounded-4 border p-4 shadow-sm">
-              <h6 class="fw-semibold text-dark mb-3">Điều kiện & Thời gian áp dụng</h6>
-              <div class="row g-3">
-                <div class="col-md-12">
-                  <label class="form-label small fw-medium text-muted mb-1">Tổng lượt sử dụng tối đa <span class="text-danger">*</span></label>
-                  <input v-model.number="formData.usageLimit" type="number" min="1" class="form-control bg-light border-0 py-2" />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-medium text-muted mb-1">Thời gian bắt đầu <span class="text-danger">*</span></label>
-                  <!-- Chặn chọn ngày giờ quá khứ -->
-                  <input v-model="formData.startDate" type="datetime-local" :min="nowDateTime" class="form-control bg-light border-0 py-2" />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-medium text-muted mb-1">Thời gian kết thúc <span class="text-danger">*</span></label>
-                  <input v-model="formData.expiredAt" type="datetime-local" :min="formData.startDate || nowDateTime" class="form-control bg-light border-0 py-2" />
-                </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-medium text-muted mb-1">Giá trị giảm <span class="text-danger">*</span></label>
+                <input v-model.number="formData.value" type="number" min="1" class="form-control bg-light border-0 py-2 fw-bold text-success custom-focus" />
+              </div>
+              
+              <div class="col-md-6">
+                <label class="form-label small fw-medium text-muted mb-1">Giá trị đơn tối thiểu <span class="text-danger">*</span></label>
+                <input v-model.number="formData.minOrderValue" type="number" min="0" class="form-control bg-light border-0 py-2 custom-focus" placeholder="0 = Áp dụng mọi đơn" />
+              </div>
+              <div class="col-md-6" v-if="formData.discountType === 'PERCENTAGE'">
+                <label class="form-label small fw-medium text-muted mb-1">Mức giảm tối đa <span class="text-danger">*</span></label>
+                <input v-model.number="formData.maxDiscountAmount" type="number" min="1" class="form-control bg-light border-0 py-2 custom-focus" />
               </div>
             </div>
           </div>
 
-          <div class="mt-auto py-3 border-top bg-white d-flex justify-content-end gap-2 sticky-bottom px-4 mx-[-1.5rem]">
-            <button type="button" @click="emit('close')" class="btn btn-light px-4 py-2 rounded-pill fw-medium">Hủy bỏ</button>
-            <button type="submit" class="btn btn-dark px-5 py-2 rounded-pill fw-semibold">Lưu Voucher</button>
+          <div class="bg-white rounded-4 border p-4 shadow-sm">
+            <h6 class="fw-semibold text-dark mb-3">Điều kiện & Thời gian áp dụng</h6>
+            <div class="row g-3">
+              <div class="col-md-12">
+                <label class="form-label small fw-medium text-muted mb-1">Tổng lượt sử dụng tối đa <span class="text-danger">*</span></label>
+                <input v-model.number="formData.usageLimit" type="number" min="1" class="form-control bg-light border-0 py-2 custom-focus" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-medium text-muted mb-1">Thời gian bắt đầu <span class="text-danger">*</span></label>
+                <input v-model="formData.startDate" type="datetime-local" :min="nowDateTime" class="form-control bg-light border-0 py-2 custom-focus" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-medium text-muted mb-1">Thời gian kết thúc <span class="text-danger">*</span></label>
+                <input v-model="formData.expiredAt" type="datetime-local" :min="formData.startDate || nowDateTime" class="form-control bg-light border-0 py-2 custom-focus" />
+              </div>
+            </div>
           </div>
           
-        </form>
-      </div>
+        </div>
+
+        <div class="modal-footer bg-white border-top px-4 py-3 d-flex justify-content-end gap-2">
+          <button type="button" @click="emit('close')" class="btn btn-light px-4 py-2 rounded-pill fw-medium border">
+            Hủy bỏ
+          </button>
+          <button 
+            type="submit" 
+            v-permission="[ROLES.OWNER, ROLES.MANAGER]"
+            class="btn btn-dark px-5 py-2 rounded-pill fw-semibold transition-all"
+          >
+            Lưu Voucher
+          </button>
+        </div>
+        
+      </form>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Lớp phủ đen làm mờ nền giống file FlashSaleModal */
+.custom-backdrop {
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(3px);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Hiệu ứng focus đồng bộ */
+.custom-focus:focus {
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1) !important;
+  border-color: #cbd5e1 !important;
+  outline: none;
+}
+
+/* Hiệu ứng nút bấm */
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+.transition-all:hover {
+  transform: translateY(-1px);
+}
+</style>

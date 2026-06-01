@@ -2,25 +2,26 @@
 import { onMounted, ref } from 'vue';
 import { useCartStore } from '../../cart/stores/cartStore';
 import { useCheckoutStore } from '../stores/checkoutStore';
-import { DEV_STUB } from '@/common/utils/dev.stub';
 
 const cartStore = useCartStore();
 const checkoutStore = useCheckoutStore();
 
 const voucherInput = ref('');
-const showVouchers = ref(false); // Dùng Vue điều khiển Dropdown thay vì JS Bootstrap
-const availableVouchers = ref(DEV_STUB.AVAILABLE_VOUCHERS); 
+const showVouchers = ref(false); 
 
 const formatVND = (val: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
 
 const handleApplyVoucher = (code: string) => {
   if (!code.trim()) return;
   voucherInput.value = code; 
-  showVouchers.value = false; // Tắt danh sách sau khi chọn
+  showVouchers.value = false;
   checkoutStore.applyVoucher(code.trim());
 };
+
 onMounted(() => {
-  checkoutStore.fetchActiveVouchers(); // Gọi API ngay khi mở component
+  if (checkoutStore && typeof checkoutStore.fetchActiveVouchers === 'function') {
+    checkoutStore.fetchActiveVouchers();
+  }
 });
 </script>
 
@@ -28,7 +29,7 @@ onMounted(() => {
   <div class="bg-white p-4 p-lg-5 rounded-4 shadow-sm border border-slate-200 sticky-top" style="top: 24px;">
     <h4 class="fw-bold mb-4 text-dark">Tóm tắt đơn hàng</h4>
     
-    <div v-if="!cartStore.cartData || cartStore.cartData.items.length === 0" class="text-center py-5">
+    <div v-if="!cartStore.cartData || !cartStore.cartData?.items?.length" class="text-center py-5">
       <i class="bi bi-cart-x display-1 text-slate-300 mb-3 d-block"></i>
       <p class="text-danger fw-bold mb-0">Giỏ hàng của bạn đang trống!</p>
     </div>
@@ -75,28 +76,28 @@ onMounted(() => {
               Chọn mã có sẵn
             </button>
             <ul v-if="showVouchers" class="dropdown-menu show position-absolute end-0 shadow border-slate-200 w-100 p-2 z-3" style="min-width: 250px; top: 100%;">
-  <li v-if="checkoutStore.availableVouchers.length === 0" class="text-center p-3 text-muted small">
-    <i class="bi bi-ticket-perforated fs-3 d-block mb-2"></i>
-    Hiện chưa có mã giảm giá nào phù hợp
-  </li>
-  <li v-else v-for="v in checkoutStore.availableVouchers" :key="v.code" class="mb-2">
-    <a class="dropdown-item p-2 rounded-3 bg-light hover-bg-primary" href="#" @click.prevent="handleApplyVoucher(v.code)">
-      <div class="fw-bold text-dark">{{ v.code }} <span class="badge bg-danger ms-1" v-if="v.discountType === 'PERCENTAGE'">-{{ v.value }}%</span></div>
-      <div class="small text-muted" style="font-size: 0.75rem;">Đơn tối thiểu: {{ formatVND(v.minOrderValue) }}</div>
-    </a>
-  </li>
-</ul>
+              <li v-if="!checkoutStore.availableVouchers || checkoutStore.availableVouchers.length === 0" class="text-center p-3 text-muted small">
+                <i class="bi bi-ticket-perforated fs-3 d-block mb-2"></i>
+                Hiện chưa có mã giảm giá nào phù hợp
+              </li>
+              <li v-else v-for="v in checkoutStore.availableVouchers" :key="v.code" class="mb-2">
+                <a class="dropdown-item p-2 rounded-3 bg-light hover-bg-primary" href="#" @click.prevent="handleApplyVoucher(v.code)">
+                  <div class="fw-bold text-dark">{{ v.code }} <span class="badge bg-danger ms-1" v-if="v.discountType === 'PERCENTAGE'">-{{ v.value }}%</span></div>
+                  <div class="small text-muted" style="font-size: 0.75rem;">Đơn tối thiểu: {{ formatVND(v.minOrderValue) }}</div>
+                </a>
+              </li>
+            </ul>
           </div>
         </label>
         
         <div class="d-flex gap-2">
           <input v-model="voucherInput" type="text" class="form-control text-uppercase shadow-none border-slate-300 fw-bold" placeholder="Nhập mã...">
-          <button @click="handleApplyVoucher(voucherInput)" class="btn btn-dark text-nowrap px-4 fw-medium" :disabled="!voucherInput.trim()">Áp dụng</button>
+          <button @click="handleApplyVoucher(voucherInput)" type="button" class="btn btn-dark text-nowrap px-4 fw-medium" :disabled="!voucherInput.trim()">Áp dụng</button>
         </div>
         
-        <div v-if="checkoutStore.formState.voucherCode" class="mt-3 p-2 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25 d-flex justify-content-between align-items-center">
+        <div v-if="checkoutStore.formState?.voucherCode" class="mt-3 p-2 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25 d-flex justify-content-between align-items-center">
           <span class="small fw-bold text-success"><i class="bi bi-check-circle-fill me-1"></i> Đã áp dụng: {{ checkoutStore.formState.voucherCode }}</span>
-          <button @click="checkoutStore.removeVoucher" class="btn btn-link text-danger text-decoration-none p-0 small fw-bold"><i class="bi bi-x"></i> Gỡ</button>
+          <button @click="checkoutStore.removeVoucher" type="button" class="btn btn-link text-danger text-decoration-none p-0 small fw-bold"><i class="bi bi-x"></i> Gỡ</button>
         </div>
       </div>
 

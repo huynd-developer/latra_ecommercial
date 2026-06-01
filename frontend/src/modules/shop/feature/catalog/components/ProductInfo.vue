@@ -33,7 +33,7 @@
       </div>
     </div>
 
-    <div class="peel-option-block mb-4" v-if="availableColors.length > 0">
+    <div class="peel-option-block mb-3" v-if="availableColors.length > 0">
       <div class="peel-option-label mb-2">Color: <strong>{{ selectedColor || 'Black' }}</strong></div>
       <div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
         <button 
@@ -49,29 +49,39 @@
       <a href="#" class="peel-link text-decoration-underline" style="font-size: 13px;">View Color Guide</a>
     </div>
 
+    <div class="peel-stock-status mb-4" v-if="activeVariant">
+      <div v-if="activeVariant.stock > 0" class="stock-available">
+        <i class="bi bi-box-seam me-1"></i> Còn lại: <strong>{{ activeVariant.stock }}</strong> sản phẩm trong kho
+      </div>
+      <div v-else class="stock-empty">
+        <i class="bi bi-exclamation-triangle me-1"></i> Rất tiếc, cấu hình này đã hết hàng!
+      </div>
+    </div>
+
     <div class="peel-actions">
       <div class="d-flex gap-2 mb-2">
-        <div class="peel-qty-box d-flex align-items-center justify-content-between">
-          <button class="qty-btn" @click="quantity > 1 ? quantity-- : null">—</button>
-          <span class="qty-val">{{ quantity }}</span>
-          <button class="qty-btn" @click="quantity < 5 ? quantity++ : null">+</button>
+        <div class="peel-qty-box d-flex align-items-center justify-content-between" :class="{ 'disabled-box': isOutOfStock }">
+          <button class="qty-btn" :disabled="isOutOfStock" @click="quantity > 1 ? quantity-- : null">—</button>
+          <span class="qty-val">{{ isOutOfStock ? 0 : quantity }}</span>
+          <button class="qty-btn" :disabled="isOutOfStock" @click="quantity < maxStock ? quantity++ : null">+</button>
         </div>
         
         <button 
           class="peel-btn peel-btn-add flex-grow-1 d-flex justify-content-center align-items-center gap-2"
-          :disabled="!isValidConfig"
+          :disabled="!isValidConfig || isOutOfStock"
           @click="handleAddToCart"
         >
-          <i class="bi bi-bag-plus" style="font-size: 16px;"></i> THÊM VÀO GIỎ HÀNG
+          <i class="bi bi-bag-plus" style="font-size: 16px;"></i> 
+          {{ isOutOfStock ? 'HẾT HÀNG' : 'THÊM VÀO GIỎ HÀNG' }}
         </button>
       </div>
 
       <button 
         class="peel-btn peel-btn-buy w-100 mb-2"
-        :disabled="!isValidConfig"
+        :disabled="!isValidConfig || isOutOfStock"
         @click="handleBuyNow"
       >
-        MUA NGAY VỚI SHOP
+        {{ isOutOfStock ? 'TẠM HẾT HÀNG' : 'MUA NGAY VỚI SHOP' }}
       </button>
 
       <div class="text-center mt-2">
@@ -83,27 +93,29 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useCartStore } from '../../cart/stores/cartStore';
 import { useAppStore } from '@/common/store/app.store';
+import { useAuthStore } from '@/modules/auth/stores/authStore'; 
 
 const props = defineProps<{ product: any; brandList?: any[]; }>();
 
 const cartStore = useCartStore();
 const appStore = useAppStore();
+const authStore = useAuthStore(); 
 const router = useRouter();
+const route = useRoute(); 
 
 const quantity = ref(1);
 const selectedStorage = ref<string>('');
 const selectedColor = ref<string>('');
 
-// Trích xuất mã màu cơ bản để render vòng tròn màu
 const getColorHex = (colorName: string) => {
   const lower = colorName?.toLowerCase() || '';
   if (lower.includes('trắng') || lower.includes('white')) return '#ffffff';
   if (lower.includes('đen') || lower.includes('black') || lower.includes('matte')) return '#222222';
   if (lower.includes('xanh dương') || lower.includes('blue')) return '#1a508b';
-  return '#b3b3b3'; // Màu xám nhạt mặc định như ảnh nếu ko nhận diện được
+  return '#b3b3b3'; 
 };
 
 const safeVariants = computed<any[]>(() => Array.isArray(props.product?.variants) ? props.product.variants : []);
@@ -125,50 +137,83 @@ onMounted(() => {
   if (availableColors.value.length > 0 && !selectedColor.value) selectedColor.value = availableColors.value[0] ?? '';
 });
 
-watch(selectedStorage, () => {
-  if (availableColors.value.length > 0 && !availableColors.value.includes(selectedColor.value)) {
-    selectedColor.value = availableColors.value[0] ?? '';
-  }
-});
-
 const activeVariant = computed<any>(() => {
   if (!hasVariants.value) return null;
   if (safeVariants.value.length === 1 && availableStorages.value.length === 0 && availableColors.value.length === 0) return safeVariants.value[0];
   return safeVariants.value.find(v => (v?.storage || '') === selectedStorage.value && (v?.color || '') === selectedColor.value);
 });
 
-const activePrice = computed(() => activeVariant.value?.price || safeVariants.value[0]?.price || 0);
+const maxStock = computed(() => activeVariant.value?.stock ?? 0);
+const isOutOfStock = computed(() => maxStock.value <= 0);
 
+watch(activeVariant, (newVariant) => {
+  if (availableColors.value.length > 0 && !availableColors.value.includes(selectedColor.value)) {
+    selectedColor.value = availableColors.value[0] ?? '';
+  }
+  
+  if (newVariant) {
+    if (newVariant.stock <= 0) {
+      quantity.value = 1; 
+    } else if (quantity.value > newVariant.stock) {
+      quantity.value = newVariant.stock; 
+    }
+  }
+});
+
+const activePrice = computed(() => activeVariant.value?.price || safeVariants.value[0]?.price || 0);
 const activeVariantId = computed<number | null>(() => activeVariant.value?.variantId || activeVariant.value?.id || null);
 const isValidConfig = computed(() => activeVariantId.value !== null);
 
-// Định dạng tiền giả định (nếu data gốc là USD thì ông sửa lại hàm format này nhé)
 const formatMoney = (val: number) => {
-  if (val < 1000) return `$${val.toFixed(2)}`; // Render USD nếu giá trị nhỏ
+  if (val < 1000) return `$${val.toFixed(2)}`; 
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
 };
 
+// --------------------------------------------------------
+// LOGIC ĐÃ SỬA: Bảo mật luồng gọi API Add to Cart
+// --------------------------------------------------------
 const handleAddToCart = async () => {
-  if (!isValidConfig.value) {
-    appStore.notifyError("Vui lòng chọn đầy đủ cấu hình sản phẩm!");
+  if (!isValidConfig.value || isOutOfStock.value) {
+    appStore.notifyError("Sản phẩm tạm thời hết hàng hoặc chưa chọn đúng cấu hình!");
     return;
   }
+
+  // 1. Chặn request API 500: Kiểm tra đăng nhập
+  if (!authStore.isLoggedIn) {
+    appStore.notifyError("Vui lòng đăng nhập để thêm vào giỏ hàng!");
+    // Đẩy sang trang login kèm "dấu vết" là đường dẫn sản phẩm hiện tại
+    router.push({ path: '/login', query: { redirect: route.fullPath } });
+    return;
+  }
+
+  // 2. Nếu đã đăng nhập thì mới cho gọi API giỏ hàng
   await cartStore.addItem(activeVariantId.value!, quantity.value);
   appStore.notifySuccess("Đã thêm vào giỏ hàng!");
 };
 
+// --------------------------------------------------------
+// LOGIC ĐÃ SỬA: Mua Ngay chuyển sang trang Giỏ Hàng
+// --------------------------------------------------------
 const handleBuyNow = async () => {
-  if (!isValidConfig.value) {
-    appStore.notifyError("Vui lòng chọn đầy đủ cấu hình sản phẩm!");
+  if (!isValidConfig.value || isOutOfStock.value) {
+    appStore.notifyError("Sản phẩm tạm thời hết hàng hoặc chưa chọn đúng cấu hình!");
     return;
   }
+
+  // 1. Kiểm tra đăng nhập
+  if (!authStore.isLoggedIn) {
+    appStore.notifyError("Vui lòng đăng nhập để mua hàng!");
+    router.push({ path: '/login', query: { redirect: route.fullPath } });
+    return;
+  }
+
+  // 2. Thêm vào giỏ hàng và chuyển hướng sang trang giỏ hàng
   await cartStore.addItem(activeVariantId.value!, quantity.value);
-  router.push('/checkout');
+  router.push('/cart'); 
 };
 </script>
 
 <style scoped>
-/* Reset font giống ảnh */
 .peel-exact-ui {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1a1a1a;
@@ -220,14 +265,36 @@ const handleBuyNow = async () => {
   color: #1a1a1a;
 }
 
-/* Vòng tròn màu y hệt bản gốc (image_d6bd93.png) */
+.peel-stock-status {
+  font-size: 13px;
+}
+.stock-available {
+  color: #2e7d32;
+  background-color: #edf7ed;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: inline-block;
+}
+.stock-empty {
+  color: #c62828;
+  background-color: #fdecea;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: inline-block;
+  font-weight: 500;
+}
+.disabled-box {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 .peel-color-swatch-wrapper {
   width: 28px;
   height: 28px;
   border-radius: 50%;
   border: 1px solid transparent; 
   background: none;
-  padding: 3px; /* Tạo viền trắng ở giữa */
+  padding: 3px; 
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -235,7 +302,7 @@ const handleBuyNow = async () => {
   transition: all 0.1s ease;
 }
 .peel-color-swatch-wrapper.active {
-  border-color: #1a1a1a; /* Viền ngoài màu đen khi active */
+  border-color: #1a1a1a; 
 }
 .peel-color-swatch-inner {
   display: block;
@@ -257,7 +324,6 @@ const handleBuyNow = async () => {
   padding: 5px 13px;
 }
 
-/* Buttons (image_f3ca0d.png) */
 .peel-qty-box {
   width: 105px;
   height: 48px;
@@ -276,10 +342,13 @@ const handleBuyNow = async () => {
   justify-content: center;
   align-items: center;
 }
+.qty-btn:disabled {
+  cursor: not-allowed;
+}
 .qty-val {
   font-size: 15px;
   font-weight: 400;
-}
+} 
 
 .peel-btn {
   height: 48px;
@@ -291,8 +360,10 @@ const handleBuyNow = async () => {
   transition: opacity 0.2s;
 }
 .peel-btn:disabled {
-  opacity: 0.5;
+  background-color: #cccccc !important;
+  color: #666666 !important;
   cursor: not-allowed;
+  opacity: 0.7;
 }
 .peel-btn:hover:not(:disabled) {
   opacity: 0.85;
@@ -304,7 +375,7 @@ const handleBuyNow = async () => {
 }
 
 .peel-btn-buy {
-  background-color: #5a31f4; /* Tím Shop Pay */
+  background-color: #5a31f4; 
   color: #ffffff;
 }
 </style>

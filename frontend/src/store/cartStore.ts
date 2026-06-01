@@ -1,9 +1,16 @@
 import { reactive, computed } from 'vue'
-import type { Product } from '../common/db'
+
+// SỬA DỨT ĐIỂM: Khai báo trực tiếp Interface Product tại đây thay vì import từ file không tồn tại
+export interface Product {
+  id: number | string;
+  name: string;
+  price: number;
+  image?: string; // Tùy chọn: có thể có ảnh hoặc không
+}
 
 // Tạo một kho dữ liệu dùng chung cho toàn bộ app
 export const cartStore = reactive({
-  items: [] as Array<{ product: Product, quantity: number }>,
+  items: [] as Array<{ product: Product; quantity: number }>,
   isOpen: false, // Trạng thái mở/đóng của Cart Drawer
 
   // Mở / Đóng giỏ hàng
@@ -23,7 +30,7 @@ export const cartStore = reactive({
   },
 
   // Xóa khỏi giỏ
-  removeItem(productId: number) {
+  removeItem(productId: number | string) {
     this.items = this.items.filter(item => item.product.id !== productId)
   }
 })

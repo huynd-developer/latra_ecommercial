@@ -1,3 +1,193 @@
+<script setup lang="ts">
+import { ref, computed, watch, onMounted } from "vue";
+import axios from "axios";
+import Swal from "sweetalert2";
+
+// Định nghĩa Interface cấu trúc cột (Schema) rõ ràng để ép kiểu dữ liệu chuẩn
+interface SchemaCol {
+  key: string; 
+  label: string; 
+  type?: string; 
+  options?: any[]; 
+  hideInFormAdd?: boolean; 
+  hideInFormEdit?: boolean; 
+  readonlyInEdit?: boolean;
+}
+
+const props = defineProps<{ activeTab: string }>();
+
+const searchQuery = ref("");
+const showModal = ref(false);
+const modalMode = ref<"add" | "edit">("add");
+
+// Sử dụng kiểu dữ liệu Record<string, any> để loại bỏ hoàn toàn các lỗi cảnh báo object trùng lặp key
+const formData = ref<Record<string, any>>({});
+const tableData = ref<Record<string, any>[]>([]);
+
+// BỘ ĐỊNH TUYẾN API (API MAPPER)
+const apiEndpoints: Record<string, string> = {
+  products: "http://localhost:8080/api/v1/products",
+  promotions: "http://localhost:8080/api/v1/promotions",
+  orders: "http://localhost:8080/api/v1/orders",
+  employees: "http://localhost:8080/api/v1/employees",
+  settings: "http://localhost:8080/api/v1/settings",
+};
+
+// LOGIC PHÂN TRANG (PAGINATION)
+const currentPage = ref(1);
+const pageSize = ref(10);
+
+const filteredData = computed(() => {
+  if (!searchQuery.value) return tableData.value;
+  const lowerQuery = searchQuery.value.toLowerCase();
+  return tableData.value.filter((item) =>
+    Object.values(item).some((val) => String(val).toLowerCase().includes(lowerQuery))
+  );
+});
+
+const totalPages = computed(() => Math.ceil(filteredData.value.length / pageSize.value) || 1);
+
+const paginatedData = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return filteredData.value.slice(start, end);
+});
+
+watch(searchQuery, () => {
+  currentPage.value = 1;
+});
+
+// GỌI API THEO TAB
+const fetchData = async () => {
+  const endpoint = apiEndpoints[props.activeTab];
+  if (!endpoint) return;
+  
+  try {
+    const res = await axios.get(endpoint);
+    tableData.value = res.data;
+    currentPage.value = 1;
+  } catch (error) {
+    console.error(`Lỗi tải dữ liệu tab ${props.activeTab}:`, error);
+    tableData.value = []; 
+  }
+};
+
+watch(() => props.activeTab, () => {
+  fetchData();
+  searchQuery.value = "";
+});
+
+// KHAI BÁO CẤU TRÚC CỘT (SCHEMAS)
+const schemas: Record<string, SchemaCol[]> = {
+  products: [
+    { key: "id", label: "SKU" }, 
+    { key: "name", label: "Tên Sản phẩm" },
+    { key: "itemType", label: "Loại", options: ["Điện thoại", "Phụ kiện"] },
+    { key: "stock", label: "Tồn", type: "number" }, 
+    { key: "price", label: "Đơn Giá", type: "money" },
+    { key: "status", label: "Trạng thái", type: "status" },
+  ],
+  promotions: [
+    { key: "id", label: "Mã Voucher" }, 
+    { key: "name", label: "Tên CT" },
+    { key: "discount", label: "Giảm (%)", type: "percent" },
+    { key: "usageLimit", label: "Lượt còn", type: "number" }, 
+    { key: "status", label: "Trạng thái", type: "status" },
+  ],
+  employees: [
+    { key: "id", label: "ID", readonlyInEdit: true, hideInFormAdd: true },
+    { key: "username", label: "Mã NV (Tên ĐN)", readonlyInEdit: true },
+    { key: "fullName", label: "Họ tên" },
+    { key: "phone", label: "SĐT" },
+    { key: "email", label: "Email" },
+    { key: "roleId", label: "Vai trò", options: [{ label: 'ADMIN', value: 1 }, { label: 'STAFF', value: 2 }] },
+    { key: "status", label: "Trạng thái", type: "status", options: [{ label: 'Hoạt động', value: 1 }, { label: 'Bị khóa', value: 0 }] },
+  ],
+};
+
+const currentSchema = computed<SchemaCol[]>(() => schemas[props.activeTab] || [{ key: "id", label: "ID" }]);
+
+const tabNames: Record<string, string> = {
+  orders: "Hóa đơn", products: "Sản phẩm", promotions: "Khuyến mãi", employees: "Nhân viên", settings: "Cài đặt",
+};
+const pageTitle = computed(() => tabNames[props.activeTab] || "Quản trị");
+
+const openModal = (mode: "add" | "edit", item: any = null) => {
+  modalMode.value = mode;
+  if (mode === "edit" && item) {
+    formData.value = { ...item };
+  } else {
+    formData.value = {};
+    currentSchema.value.forEach((col) => {
+      if (col.type === "number" || col.type === "money" || col.type === "percent") formData.value[col.key] = 0;
+      else if (col.options) formData.value[col.key] = col.options[0]?.value || col.options[0];
+      else formData.value[col.key] = "";
+    });
+    formData.value.status = 1;
+  }
+  showModal.value = true;
+};
+
+const closeModal = () => showModal.value = false;
+
+// LƯU DỮ LIỆU (POST / PUT)
+const saveData = async () => {
+  const endpoint = apiEndpoints[props.activeTab];
+  if (!endpoint) return closeModal();
+
+  try {
+    if (modalMode.value === "add") {
+      await axios.post(endpoint, formData.value);
+      Swal.fire({ icon: 'success', title: 'Thêm mới thành công!', timer: 1500, showConfirmButton: false });
+    } else {
+      await axios.put(`${endpoint}/${formData.value.id}`, formData.value);
+      Swal.fire({ icon: 'success', title: 'Cập nhật thành công!', timer: 1500, showConfirmButton: false });
+    }
+    closeModal();
+    await fetchData(); 
+  } catch (error: any) {
+    const msg = error.response?.data?.message || 'Lỗi hệ thống!';
+    Swal.fire({ icon: 'error', title: 'Lỗi', text: msg });
+  }
+};
+
+// XÓA DỮ LIỆU (DELETE)
+const deleteItem = async (id: string | number) => {
+  const endpoint = apiEndpoints[props.activeTab];
+  if (!endpoint) return;
+
+  const result = await Swal.fire({
+    title: 'Xác nhận xóa/khóa?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#1e293b',
+    confirmButtonText: 'Đồng ý'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await axios.delete(`${endpoint}/${id}`);
+      Swal.fire({ icon: 'success', title: 'Đã thực hiện!', timer: 1000, showConfirmButton: false });
+      fetchData();
+    } catch (error: any) {
+      Swal.fire({ icon: 'error', title: 'Lỗi', text: error.response?.data?.message || 'Không thể thực hiện!' });
+    }
+  }
+};
+
+const formatMoney = (val: any) => `${(Number(val) || 0).toLocaleString("vi-VN")} ₫`;
+const formatVNTime = (isoString: string) => {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${pad(date.getHours())}:${pad(date.getMinutes())} ${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+};
+
+onMounted(() => {
+  fetchData();
+});
+</script>
+
 <template>
   <div class="bg-white h-100 d-flex flex-column overflow-hidden rounded-4 shadow-sm border border-slate-100">
     <div class="p-4 border-bottom border-slate-100 d-flex justify-content-between align-items-center z-2">
@@ -108,11 +298,13 @@
                 <template v-for="col in currentSchema" :key="col.key">
                   <div class="mb-3" v-if="!(modalMode === 'add' && col.hideInFormAdd) && !(modalMode === 'edit' && col.hideInFormEdit)">
                     <label class="form-label small fw-semibold text-slate-500 mb-1">{{ col.label }}</label>
+                    
                     <select v-if="col.options" v-model="formData[col.key]" class="form-select shadow-none border-slate-200 bg-white fw-medium text-slate-800 rounded-3 focus-ring-peel" required>
-                      <option v-for="opt in col.options" :key="opt" :value="opt.value || opt">
-                        {{ opt.label || opt }}
+                      <option v-for="opt in col.options" :key="typeof opt === 'object' ? opt.value : opt" :value="typeof opt === 'object' ? opt.value : opt">
+                        {{ typeof opt === 'object' ? opt.label : opt }}
                       </option>
                     </select>
+                    
                     <input v-else-if="col.key === 'id' && modalMode === 'edit' && col.readonlyInEdit" v-model="formData[col.key]" type="text" class="form-control shadow-none border-slate-200 bg-slate-100 fw-medium text-slate-500 rounded-3" disabled />
                     <input v-else-if="col.type === 'money' || col.type === 'number' || col.type === 'percent'" v-model.number="formData[col.key]" type="number" class="form-control shadow-none border-slate-200 bg-white fw-bold text-slate-800 rounded-3 focus-ring-peel" required />
                     <input v-else-if="col.type === 'datetime'" v-model="formData[col.key]" type="datetime-local" class="form-control shadow-none border-slate-200 bg-white fw-medium text-slate-800 rounded-3 focus-ring-peel" required />
@@ -132,198 +324,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
-import axios from "axios";
-import Swal from "sweetalert2";
-
-const props = defineProps<{ activeTab: string }>();
-
-const searchQuery = ref("");
-const showModal = ref(false);
-const modalMode = ref<"add" | "edit">("add");
-const formData = ref<Record<string, any>>({});
-
-// 1. CHUYỂN SANG DÙNG MẢNG RỖNG ĐỂ CHỨA DATA TỪ API
-const tableData = ref<any[]>([]);
-
-// 2. BỘ ĐỊNH TUYẾN API (API MAPPER)
-const apiEndpoints: Record<string, string> = {
-  products: "http://localhost:8080/api/v1/products",
-  promotions: "http://localhost:8080/api/v1/promotions",
-  orders: "http://localhost:8080/api/v1/orders",
-  employees: "http://localhost:8080/api/v1/employees", // Ví dụ API thật
-  settings: "http://localhost:8080/api/v1/settings",
-};
-
-// 3. LOGIC PHÂN TRANG (PAGINATION)
-const currentPage = ref(1);
-const pageSize = ref(10); // Số dòng trên 1 trang
-
-const filteredData = computed(() => {
-  if (!searchQuery.value) return tableData.value;
-  const lowerQuery = searchQuery.value.toLowerCase();
-  return tableData.value.filter((item) =>
-    Object.values(item).some((val) => String(val).toLowerCase().includes(lowerQuery))
-  );
-});
-
-// Tính tổng số trang
-const totalPages = computed(() => Math.ceil(filteredData.value.length / pageSize.value) || 1);
-
-// Lấy dữ liệu cắt ra cho trang hiện tại
-const paginatedData = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value;
-  const end = start + pageSize.value;
-  return filteredData.value.slice(start, end);
-});
-
-// Reset về trang 1 nếu người dùng gõ tìm kiếm
-watch(searchQuery, () => {
-  currentPage.value = 1;
-});
-
-// 4. GỌI API THEO TAB
-const fetchData = async () => {
-  const endpoint = apiEndpoints[props.activeTab];
-  if (!endpoint) return;
-  
-  try {
-    const res = await axios.get(endpoint);
-    tableData.value = res.data;
-    currentPage.value = 1; // Reset trang khi đổi tab
-  } catch (error) {
-    console.error(`Lỗi tải dữ liệu tab ${props.activeTab}:`, error);
-    // Nếu API chưa có (ví dụ tab products chưa code backend), ta tạm để mảng rỗng
-    tableData.value = []; 
-  }
-};
-
-// Lắng nghe khi người dùng đổi tab (từ Component Cha) thì gọi lại API
-watch(() => props.activeTab, () => {
-  fetchData();
-  searchQuery.value = "";
-});
-
-
-// KHAI BÁO CẤU TRÚC CỘT (SCHEMA)
-interface SchemaCol {
-  key: string; label: string; type?: string; options?: any[]; 
-  hideInFormAdd?: boolean; hideInFormEdit?: boolean; readonlyInEdit?: boolean;
-}
-
-const schemas: Record<string, SchemaCol[]> = {
-  products: [
-    { key: "id", label: "SKU" }, { key: "name", label: "Tên Sản phẩm" },
-    { key: "itemType", label: "Loại", options: ["Điện thoại", "Phụ kiện"] },
-    { key: "stock", label: "Tồn", type: "number" }, { key: "price", label: "Đơn Giá", type: "money" },
-    { key: "status", label: "Trạng thái", type: "status" },
-  ],
-  promotions: [
-    { key: "id", label: "Mã Voucher" }, { key: "name", label: "Tên CT" },
-    { key: "discount", label: "Giảm (%)", type: "percent" },
-    { key: "usageLimit", label: "Lượt còn", type: "number" }, { key: "status", label: "Trạng thái", type: "status" },
-  ],
-  employees: [
-    { key: "id", label: "ID", readonlyInEdit: true, hideInFormAdd: true },
-    { key: "username", label: "Mã NV (Tên ĐN)", readonlyInEdit: true },
-    { key: "fullName", label: "Họ tên" },
-    { key: "phone", label: "SĐT" },
-    { key: "email", label: "Email" },
-    { key: "roleId", label: "Vai trò", options: [{label: 'ADMIN', value: 1}, {label: 'STAFF', value: 2}] },
-    { key: "status", label: "Trạng thái", type: "status", options: [{label: 'Hoạt động', value: 1}, {label: 'Bị khóa', value: 0}] },
-  ],
-  // ... (Tương tự cho các tab khác)
-};
-
-const currentSchema = computed(() => schemas[props.activeTab] || [{ key: "id", label: "ID" }]);
-
-const tabNames: Record<string, string> = {
-  orders: "Hóa đơn", products: "Sản phẩm", promotions: "Khuyến mãi", employees: "Nhân viên", settings: "Cài đặt",
-};
-const pageTitle = computed(() => tabNames[props.activeTab] || "Quản trị");
-
-const openModal = (mode: "add" | "edit", item: any = null) => {
-  modalMode.value = mode;
-  if (mode === "edit" && item) {
-    formData.value = { ...item };
-  } else {
-    formData.value = {};
-    currentSchema.value.forEach((col) => {
-      if (col.type === "number" || col.type === "money" || col.type === "percent") formData.value[col.key] = 0;
-      else if (col.options) formData.value[col.key] = col.options[0]?.value || col.options[0];
-      else formData.value[col.key] = "";
-    });
-    formData.value.status = 1;
-  }
-  showModal.value = true;
-};
-
-const closeModal = () => showModal.value = false;
-
-// 5. LƯU DỮ LIỆU (POST / PUT)
-const saveData = async () => {
-  const endpoint = apiEndpoints[props.activeTab];
-  if (!endpoint) return closeModal();
-
-  try {
-    if (modalMode.value === "add") {
-      await axios.post(endpoint, formData.value);
-      Swal.fire({ icon: 'success', title: 'Thêm mới thành công!', timer: 1500, showConfirmButton: false });
-    } else {
-      await axios.put(`${endpoint}/${formData.value.id}`, formData.value);
-      Swal.fire({ icon: 'success', title: 'Cập nhật thành công!', timer: 1500, showConfirmButton: false });
-    }
-    closeModal();
-    
-    // Thêm chữ await vào đây để ép hệ thống chờ tải xong mới làm việc khác
-    await fetchData(); 
-    
-  } catch (error: any) {
-    const msg = error.response?.data?.message || 'Lỗi hệ thống!';
-    Swal.fire({ icon: 'error', title: 'Lỗi', text: msg });
-  }
-};
-
-// 6. XÓA DỮ LIỆU (DELETE)
-const deleteItem = async (id: string | number) => {
-  const endpoint = apiEndpoints[props.activeTab];
-  if (!endpoint) return;
-
-  const result = await Swal.fire({
-    title: 'Xác nhận xóa/khóa?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#1e293b',
-    confirmButtonText: 'Đồng ý'
-  });
-
-  if (result.isConfirmed) {
-    try {
-      await axios.delete(`${endpoint}/${id}`);
-      Swal.fire({ icon: 'success', title: 'Đã thực hiện!', timer: 1000, showConfirmButton: false });
-      fetchData();
-    } catch (error: any) {
-      Swal.fire({ icon: 'error', title: 'Lỗi', text: error.response?.data?.message || 'Không thể thực hiện!' });
-    }
-  }
-};
-
-const formatMoney = (val: any) => `${(Number(val) || 0).toLocaleString("vi-VN")} ₫`;
-const formatVNTime = (isoString: string) => {
-  if (!isoString) return "";
-  const date = new Date(isoString);
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${pad(date.getHours())}:${pad(date.getMinutes())} ${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
-};
-
-onMounted(() => {
-  fetchData();
-});
-</script>
-
 <style scoped>
-/* TOÀN BỘ CSS CŨ CỦA BẠN GIỮ NGUYÊN BÊN DƯỚI NÀY */
 .text-slate-400 { color: #94a3b8 !important; }
 .text-slate-500 { color: #64748b !important; }
 .text-slate-700 { color: #334155 !important; }

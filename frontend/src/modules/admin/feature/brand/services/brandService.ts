@@ -11,25 +11,28 @@ export const brandService = {
   },
 
   createBrand: async (payload: BrandRequestDTO) => {
-    const response = await axios.post<ApiResponse<Brand>>(`${API_URL}/admin`, payload);
+    // 🛠️ ĐÃ SỬA: Xóa /admin, gọi thẳng gốc API_URL
+    const response = await axios.post<ApiResponse<Brand>>(API_URL, payload);
     return response.data.data;
   },
 
   updateBrand: async (id: number, payload: BrandRequestDTO) => {
-    const response = await axios.put<ApiResponse<Brand>>(`${API_URL}/admin/${id}`, payload);
+    // 🛠️ ĐÃ SỬA: Xóa /admin
+    const response = await axios.put<ApiResponse<Brand>>(`${API_URL}/${id}`, payload);
     return response.data.data;
   },
 
   deleteBrand: async (id: number) => {
-    const response = await axios.delete<ApiResponse<void>>(`${API_URL}/admin/${id}`);
+    // 🛠️ ĐÃ SỬA: Xóa /admin
+    const response = await axios.delete<ApiResponse<void>>(`${API_URL}/${id}`);
     return response.data;
   },
 
-  // API upload logo (Bạn cần đảm bảo bên Java Controller đã mở endpoint này)
   uploadLogo: async (id: number, file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await axios.post<ApiResponse<string>>(`${API_URL}/admin/${id}/logo`, formData, {
+    // 🛠️ ĐÃ SỬA: Xóa /admin
+    const response = await axios.post<ApiResponse<string>>(`${API_URL}/${id}/logo`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data.data;

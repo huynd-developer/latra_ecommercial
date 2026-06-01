@@ -1,10 +1,8 @@
-// frontend/src/modules/shop/feature/checkout/services/checkoutService.ts
 import request from '@/common/services/request';
 import type { CheckoutRequest, CheckoutResponse, VoucherCheckResponse } from '../types/checkout.type';
 import type { ApiResponse } from '@/common/types/api.type';
 
 export const checkoutService = {
-  // Lấy danh sách Voucher thực tế từ DB
   getActiveVouchers: async (): Promise<any[]> => {
     const res = await request.get<any, ApiResponse<any[]>>('/promotions/public/vouchers/active');
     return res.data;

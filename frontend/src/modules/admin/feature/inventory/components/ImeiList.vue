@@ -14,26 +14,31 @@ const statusFilter = ref<string>('ALL');
 const currentPage = ref(1);
 const pageSize = ref(15);
 
-// Lọc thông minh
+// Lọc thông minh dữ liệu danh sách IMEI
 const filteredImeis = computed(() => {
-  let result = props.imeis;
+  let result = props.imeis || [];
   if (statusFilter.value !== 'ALL') {
     result = result.filter(i => i.status === statusFilter.value);
   }
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase();
-    result = result.filter(i => i.imeiCode.toLowerCase().includes(q) || i.productName.toLowerCase().includes(q));
+    result = result.filter(i => 
+      i.imeiCode?.toLowerCase().includes(q) || 
+      i.productName?.toLowerCase().includes(q)
+    );
   }
   return result;
 });
 
+// Phân trang Client-side
 const paginatedImeis = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
   return filteredImeis.value.slice(start, start + pageSize.value);
 });
+
 const totalPages = computed(() => Math.ceil(filteredImeis.value.length / pageSize.value) || 1);
 
-// Xử lý Xóa
+// Xử lý Xóa mã định danh (Chỉ khả dụng với máy AVAILABLE)
 const deleteImei = async (imei: Imei) => {
   if (imei.status !== 'AVAILABLE') return appStore.notifyError('Chỉ được xóa máy đang ở trạng thái AVAILABLE!');
   if (!confirm(`Xóa mã IMEI [${imei.imeiCode}] khỏi hệ thống?`)) return;
@@ -50,21 +55,24 @@ const deleteImei = async (imei: Imei) => {
   }
 };
 
-// Xử lý Đổi trạng thái với Rollback logic
-const handleStatusChange = async (imei: Imei, newStatus: ImeiStatus, event: Event) => {
-  const oldStatus = imei.status; // Lưu lại trạng thái cũ
+// 🛠️ ĐÃ SỬA: Xử lý Đổi trạng thái bẫy Rollback cực chuẩn (Bỏ qua v-model tránh race condition)
+const handleStatusChange = async (imei: Imei, event: Event) => {
   const selectElement = event.target as HTMLSelectElement;
+  const newStatus = selectElement.value as ImeiStatus;
+  const oldStatus = imei.status; // Giữ lại trạng thái cũ chính xác tuyệt đối
 
   try {
     appStore.startLoading();
-    await imeiService.changeStatus(imei.id, newStatus);
+    // Gọi đúng tên hàm thực tế của file service
+    await imeiService.changeImeiStatus(imei.id, newStatus);
+    
+    // API phản hồi OK thành công -> Tiến hành cập nhật State giao diện
+    imei.status = newStatus;
     appStore.notifySuccess('Cập nhật trạng thái thành công!');
-    emit('refresh');
   } catch (error: any) {
-    // Nếu API lỗi (hoặc BE chặn), trả UI về trạng thái cũ
+    // Nếu API lỗi (hoặc phân quyền chặn), ép UI Select Box nhảy ngược lại giá trị ban đầu
     selectElement.value = oldStatus; 
-    imei.status = oldStatus;
-    appStore.notifyError(error.response?.data?.message || 'Không thể đổi trạng thái!');
+    appStore.notifyError(error.response?.data?.message || 'Không thể đổi trạng thái thiết bị!');
   } finally {
     appStore.stopLoading();
   }
@@ -73,7 +81,6 @@ const handleStatusChange = async (imei: Imei, newStatus: ImeiStatus, event: Even
 
 <template>
   <div class="h-100 d-flex flex-column">
-    <!-- Bộ lọc -->
     <div class="d-flex gap-3 mb-3">
       <input v-model="searchQuery" type="text" class="form-control rounded-pill shadow-none" placeholder="Tìm theo IMEI hoặc Tên máy..." style="max-width: 300px;" @input="currentPage = 1">
       <select v-model="statusFilter" class="form-select rounded-pill shadow-none" style="max-width: 200px;" @change="currentPage = 1">
@@ -86,7 +93,6 @@ const handleStatusChange = async (imei: Imei, newStatus: ImeiStatus, event: Even
       </select>
     </div>
 
-    <!-- Bảng -->
     <div class="table-responsive flex-grow-1 border rounded-3">
       <table class="table align-middle mb-0">
         <thead class="bg-light text-muted small text-uppercase">
@@ -112,10 +118,9 @@ const handleStatusChange = async (imei: Imei, newStatus: ImeiStatus, event: Even
             <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ imei.condition }}</span></td>
             
             <td class="text-center">
-              <!-- SMART DROPDOWN STATUS -->
               <select 
-                v-model="imei.status" 
-                @change="handleStatusChange(imei, imei.status, $event)"
+                :value="imei.status" 
+                @change="handleStatusChange(imei, $event)"
                 class="form-select form-select-sm shadow-none fw-bold border-0"
                 :class="{
                   'text-success bg-success bg-opacity-10': imei.status === 'AVAILABLE',
@@ -135,8 +140,8 @@ const handleStatusChange = async (imei: Imei, newStatus: ImeiStatus, event: Even
             <td class="small text-muted">{{ formatDate(imei.createdAt) }}</td>
             
             <td class="text-center pe-3">
-              <!-- SMART DELETE BUTTON -->
               <button 
+                v-permission="['OWNER']"
                 @click="deleteImei(imei)" 
                 class="btn btn-sm btn-light rounded-circle"
                 :class="imei.status === 'AVAILABLE' ? 'text-danger' : 'text-muted opacity-50'"
@@ -151,7 +156,6 @@ const handleStatusChange = async (imei: Imei, newStatus: ImeiStatus, event: Even
       </table>
     </div>
 
-    <!-- Phân trang -->
     <div class="d-flex justify-content-between align-items-center pt-3">
       <span class="small text-muted">Hiển thị {{ paginatedImeis.length }} / {{ filteredImeis.length }}</span>
       <div class="btn-group">

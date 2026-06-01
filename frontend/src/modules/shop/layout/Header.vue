@@ -339,8 +339,62 @@
 
       <div class="d-flex align-items-center gap-4 header-icons order-4">
         <a href="#" class="text-dark fs-5"><i class="bi bi-search"></i></a>
-        <a href="#" class="text-dark fs-5"><i class="bi bi-person"></i></a>
-        <a href="#" class="text-dark fs-5"><i class="bi bi-cart3"></i></a>
+        
+        <template v-if="isLoggedIn">
+          <div 
+            class="profile-wrapper position-relative"
+            @mouseenter="showProfileMenu = true"
+            @mouseleave="showProfileMenu = false"
+          >
+            <a href="#" class="text-dark fs-5 d-block"><i class="bi bi-person"></i></a>
+            
+            <div class="profile-dropdown shadow-sm" :class="{ 'show': showProfileMenu }">
+              <div class="profile-header border-bottom py-2">
+                <h6 class="mb-0 fw-bold text-dark">{{ currentUser?.fullName || 'Khách hàng' }}</h6>
+              </div>
+
+              <ul class="profile-dropdown-list list-unstyled mb-0">
+                <li>
+                  <a href="#" class="d-flex align-items-center text-decoration-none menu-item">
+                    <i class="bi bi-person-circle fs-5 me-3"></i>
+                    <span>Trang cá nhân</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#" class="d-flex align-items-center text-decoration-none menu-item">
+                    <i class="bi bi-box-seam fs-5 me-3"></i>
+                    <span>Đơn hàng của tôi</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#" class="d-flex align-items-center text-decoration-none menu-item">
+                    <i class="bi bi-heart fs-5 me-3"></i>
+                    <span>Sản phẩm yêu thích</span>
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider my-1"></li>
+                <li>
+                  <a href="#" @click.prevent="handleLogout" class="d-flex align-items-center text-decoration-none menu-item text-danger">
+                    <i class="bi bi-box-arrow-right fs-5 me-3"></i>
+                    <span>Đăng xuất</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </template>
+
+        <template v-else>
+          <div class="d-flex align-items-center gap-3">
+            <a href="#" @click.prevent="goToLogin" class="text-dark text-decoration-none fw-bold" style="font-size: 14px;">Đăng nhập</a>
+            <span class="text-muted">|</span>
+            <a href="#" @click.prevent="goToRegister" class="text-dark text-decoration-none fw-bold" style="font-size: 14px;">Đăng ký</a>
+          </div>
+        </template>
+
+        <a href="#" @click.prevent="handleCartClick" class="text-dark fs-5">
+          <i class="bi bi-cart3"></i>
+        </a>
       </div>
     </div>
   </header>
@@ -348,11 +402,17 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router'; // [MỚI] Import useRouter
+import { useRouter } from 'vue-router'; 
 
-const router = useRouter(); // [MỚI] Khởi tạo router
+const router = useRouter(); 
 const activeMenu = ref<string | null>(null);
+const showProfileMenu = ref(false); 
 
+// State quản lý User
+const isLoggedIn = ref(false); 
+const currentUser = ref<{ fullName: string } | null>(null);
+
+// --- DỮ LIỆU MENU ---
 const applePhones = [
   'iPhone 17 Pro Max', 'iPhone 17 Pro', 'iPhone 17', 'iPhone 17 Air',
   'iPhone 16 Pro Max', 'iPhone 16 Pro', 'iPhone 16 Plus', 'iPhone 16e', 'iPhone 16',
@@ -383,189 +443,347 @@ const megaProducts = [
   { name: 'RePeel Case', formattedName: 'RePeel<br>Case', desc: 'Recycled Material', img: 'https://placehold.co/300x300/d9d9d9/333333?text=RePeel' }
 ];
 
+// --- LOGIC MENU & ROUTER ---
 const toggleMenu = (menuName: string) => { 
   activeMenu.value = activeMenu.value === menuName ? null : menuName; 
 };
-
 const closeMenu = () => { activeMenu.value = null; };
 
-// [MỚI] Sửa hàm selectPhone để dùng Vue Router thay vì emit
 const selectPhone = (name: string) => {
   activeMenu.value = null; 
-  
-  // Biến tên điện thoại thành slug (VD: "iPhone 17 Pro Max" -> "iphone-17-pro-max")
   const slug = name.toLowerCase().replace(/\s+/g, '-');
-  
-  // Push qua Router (yêu cầu cấu hình route có name là 'Category')
-  router.push({ name: 'Category', params: { slug: slug } });
-  
-  // Nếu bạn chưa cấu hình name route, bạn có thể dùng thẳng path:
-  // router.push(`/category/${slug}`);
+  router.push({ name: 'ProductDetailBySlug', params: { slug: slug } });
 };
 
-// [MỚI] Sửa hàm goHome để chuyển về trang chủ bằng Router
 const goHome = () => {
   activeMenu.value = null;
   router.push('/');
 };
 
-onMounted(() => { window.addEventListener('click', closeMenu); });
-onUnmounted(() => { window.removeEventListener('click', closeMenu); });
+const goToLogin = () => { router.push('/login'); };
+const goToRegister = () => { router.push('/register'); };
+
+// Xử lý khi bấm nút Giỏ Hàng
+const handleCartClick = () => {
+  if (!isLoggedIn.value) {
+    // Nếu chưa đăng nhập -> Đẩy sang login kèm theo query redirect về lại giỏ hàng
+    router.push({ path: '/login', query: { redirect: '/cart' } });
+  } else {
+    // Nếu đã đăng nhập -> Vào thẳng trang giỏ hàng của hệ thống
+    router.push('/cart'); 
+  }
+};
+
+// --- LOGIC AUTHENTICATION ---
+const checkAuthStatus = () => {
+  const token = localStorage.getItem('accessToken');
+  const userRawData = localStorage.getItem('currentUser');
+
+  if (token && userRawData) {
+    try {
+      const parsedUser = JSON.parse(userRawData);
+      isLoggedIn.value = true;
+      currentUser.value = parsedUser; 
+    } catch (error) {
+      console.error("Lỗi parse thông tin user, xóa dữ liệu rác:", error);
+      handleLogout(); 
+    }
+  } else {
+    isLoggedIn.value = false;
+    currentUser.value = null;
+  }
+};
+
+const handleLogout = () => {
+  showProfileMenu.value = false;
+  localStorage.removeItem('accessToken'); 
+  localStorage.removeItem('currentUser'); 
+  
+  isLoggedIn.value = false;
+  currentUser.value = null;
+
+  window.dispatchEvent(new Event('storage'));
+  router.push('/');
+};
+
+// --- LIFECYCLE HOOKS ---
+onMounted(() => { 
+  window.addEventListener('click', closeMenu); 
+  checkAuthStatus(); 
+  window.addEventListener('user-logged-in', checkAuthStatus);
+  window.addEventListener('storage', checkAuthStatus);
+});
+
+onUnmounted(() => { 
+  window.removeEventListener('click', closeMenu); 
+  window.removeEventListener('user-logged-in', checkAuthStatus);
+  window.removeEventListener('storage', checkAuthStatus);
+});
 </script>
 
 <style scoped>
-.custom-navbar { 
-  background: #fff; 
-  z-index: 1020; 
-  position: sticky; 
-  top: 0; 
-  transition: all 0.3s ease; 
+/* Toàn bộ phần Style cũ giữ nguyên để giữ vững giao diện */
+.custom-navbar {
+  background-color: #ffffff;
+  z-index: 1030;
 }
-.custom-link { color: #000 !important; font-weight: 500; font-size: 15px; padding: 10px 15px; }
-
-/* MEGA MENU CHUNG */
+.logo-link {
+  text-decoration: none;
+  color: #000000;
+}
+.custom-link {
+  color: #111827;
+  font-weight: 500;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+}
+.custom-link:hover {
+  color: #6b7280;
+}
+.arrow-icon {
+  font-size: 11px;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+.rotate-180 {
+  transform: rotate(180deg);
+}
+.mega-menu-wrapper {
+  position: static;
+}
 .mega-menu {
-  position: absolute; top: 100%; left: 0; width: 100vw; background: white;
-  border-top: 1px solid #f0f0f0; z-index: 999;
-  visibility: hidden; opacity: 0; pointer-events: none;
-  transform: translateY(10px);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  max-height: 85vh; overflow-y: auto;
-}
-.show-mega { visibility: visible; opacity: 1; pointer-events: auto; transform: translateY(0); }
-.arrow-icon { display: inline-block; transition: transform 0.3s ease; font-size: 12px; }
-.rotate-180 { transform: rotate(180deg); }
-
-/* SIMPLE DROPDOWN CHO ABOUT */
-.simple-dropdown-wrapper { position: relative; }
-.simple-dropdown {
   position: absolute;
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  background: white;
-  min-width: 180px;
-  border-top: 1px solid #f0f0f0;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
-  padding: 15px 0;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
   visibility: hidden;
   opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(10px);
+  transition: all 0.25s ease;
   z-index: 1000;
+  border-top: 1px solid #e5e7eb;
 }
-.simple-dropdown.show-dropdown {
+.show-mega {
   visibility: visible;
   opacity: 1;
-  pointer-events: auto;
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
 }
-.simple-dropdown-list { list-style: none; padding: 0; margin: 0; }
-.simple-dropdown-list li { margin-bottom: 5px; }
-.simple-dropdown-list li:last-child { margin-bottom: 0; }
-.simple-dropdown-list a {
-  display: block;
-  padding: 8px 24px;
-  color: #000;
-  text-decoration: none;
-  font-size: 15px;
-  font-weight: 500;
-  transition: background-color 0.2s, color 0.2s;
+.menu-heading {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #111827;
+  letter-spacing: 0.05em;
+  margin-bottom: 15px;
 }
-.simple-dropdown-list a:hover {
-  background-color: #f9f9f9;
-  color: #555;
-}
-
-/* LINK CHO PHẦN ACCESSORIES CÓ VIỀN TRÁI */
-.accessory-link {
-  font-weight: 600;
-  color: #000;
-  font-size: 14px;
-  text-decoration: none;
-  display: inline-block;
-  border-left: 2px solid #e5e5e5;
-  padding-left: 12px;
-  transition: border-color 0.2s, color 0.2s;
-}
-.accessory-link:hover {
-  border-left-color: #000;
-}
-
-/* LINK MENU DẠNG HEADING (CHARGING) */
 .menu-heading-link {
-  font-weight: 700; 
-  color: #000; 
-  font-size: 14px; 
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
   text-decoration: none;
-  display: inline-block;
-  transition: color 0.2s;
 }
 .menu-heading-link:hover {
   text-decoration: underline;
 }
-
-/* THỂ HIỆN SẢN PHẨM CHARGING VÀ ACCESSORIES */
+.menu-list {
+  list-style: none;
+  padding-left: 0;
+}
+.menu-list li {
+  margin-bottom: 8px;
+}
+.menu-list li a {
+  color: #4b5563;
+  text-decoration: none;
+  font-size: 14px;
+}
+.menu-list li a:hover {
+  color: #000000;
+}
+.shop-all-link {
+  font-weight: 600;
+  color: #111827 !important;
+}
+.new-badge {
+  font-size: 8px;
+  padding: 3px 6px;
+  vertical-align: middle;
+}
+.mega-product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+.mega-card {
+  background-color: #f9fafb;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+.mega-card:hover {
+  background-color: #f3f4f6;
+}
+.mega-card-img img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.mega-card-body {
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-grow: 1;
+}
+.mega-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+.mega-card-desc {
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 0;
+}
+.mega-arrow-btn {
+  width: 24px;
+  height: 24px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+}
+.mega-screen-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.screen-img-wrapper {
+  max-height: 160px;
+  overflow: hidden;
+}
+.accessory-link {
+  font-size: 14px;
+  color: #4b5563;
+  text-decoration: none;
+  font-weight: 500;
+}
+.accessory-link:hover {
+  color: #000000;
+  text-decoration: underline;
+}
 .featured-product-link:hover .featured-img-box img,
 .featured-product-link:hover .featured-img-clear img {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
-
 .featured-img-box {
-  background-color: #efefef;
-  border-radius: 12px;
+  background-color: #f4f4f4;
+  border-radius: 6px;
   overflow: hidden;
-  aspect-ratio: 1; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
-
-.featured-img-clear {
-  background-color: transparent;
-  overflow: hidden;
-  aspect-ratio: 1; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .featured-img-box img,
 .featured-img-clear img {
-  width: 90%;
-  height: 90%;
-  object-fit: contain;
-  transition: transform 0.4s ease;
+  width: 100%;
+  height: auto;
+  transition: transform 0.3s ease;
+}
+.simple-dropdown-wrapper {
+  position: relative;
+}
+.simple-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 160px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.2s ease;
+  z-index: 1000;
+}
+.show-dropdown {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+.simple-dropdown-list {
+  list-style: none;
+  padding: 8px 0;
+  margin-bottom: 0;
+}
+.simple-dropdown-list li a {
+  display: block;
+  padding: 8px 16px;
+  color: #4b5563;
+  text-decoration: none;
+  font-size: 14px;
+}
+.simple-dropdown-list li a:hover {
+  background-color: #f9fafb;
+  color: #000000;
+}
+.header-icons a {
+  transition: color 0.2s;
+}
+.header-icons a:hover {
+  color: #6b7280 !important;
 }
 
-/* BÊN TRÁI: DANH SÁCH MENU (IPHONE/SCREEN) */
-.menu-heading { font-weight: 700; margin-bottom: 1.2rem; color: #000; font-size: 14px; }
-.menu-list { list-style: none; padding: 0; }
-.menu-list li { margin-bottom: 12px; }
-.menu-list a { text-decoration: none; color: #444; font-size: 13.5px; transition: color 0.2s; }
-.menu-list a:hover { color: #000; text-decoration: underline; }
-.shop-all-link { color: #000 !important; font-weight: 500; }
-.new-badge { font-size: 9px; padding: 3px 6px; letter-spacing: 0.5px; background-color: #2b6cb0 !important; vertical-align: middle;}
-
-/* LƯỚI CARD BÊN PHẢI (CASES & SCREEN) */
-.mega-product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 520px; padding-bottom: 20px; }
-.mega-screen-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 650px; }
-
-/* STYLE THẺ CARD (CASES & SCREEN) */
-.mega-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 16px; overflow: hidden; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; }
-.mega-card:hover { border-color: #dcdcdc; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-
-.mega-card-img { width: 100%; aspect-ratio: 1; background-color: #f8f8f8; display: flex; align-items: center; justify-content: center; }
-.screen-img-wrapper { aspect-ratio: 4 / 3; }
-.mega-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-.mega-card:hover .mega-card-img img { transform: scale(1.04); }
-
-.mega-card-body { padding: 16px 14px; display: flex; justify-content: space-between; align-items: flex-start; flex-grow: 1; }
-.mega-card-info { padding-right: 6px; }
-.mega-card-title { font-size: 14px; font-weight: 600; line-height: 1.35; margin-bottom: 4px; color: #000; }
-.mega-card-desc { font-size: 11px; color: #888; margin: 0; }
-
-.mega-arrow-btn { width: 32px; height: 32px; border-radius: 50%; background-color: #F1F1F1; display: flex; align-items: center; justify-content: center; color: #000; font-size: 13px; flex-shrink: 0; transition: all 0.2s; }
-.mega-card:hover .mega-arrow-btn { background-color: #e4e4e4; }
+/* PROFILE DROPDOWN MENU */
+.profile-dropdown {
+  position: absolute;
+  top: 130%;
+  right: 0;
+  width: 240px;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 10px;
+  z-index: 2000;
+  display: block;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.25s ease;
+  border: 1px solid #f0f0f0;
+}
+.profile-dropdown.show {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+.profile-header {
+  padding: 4px 12px 10px 12px;
+}
+.profile-dropdown-list {
+  padding-top: 6px;
+}
+.menu-item {
+  padding: 10px 12px;
+  color: #374151;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.menu-item:hover {
+  background: #f3f4f6;
+  color: #000000;
+}
+.menu-item.text-danger:hover {
+  background: #fef2f2;
+  color: #dc2626 !important;
+}
 </style>

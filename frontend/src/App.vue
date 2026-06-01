@@ -1,43 +1,42 @@
-<!-- <template>
-  <div>
-    <Header />
-
-    <main>
-      <router-view />
-    </main>
-  </div>
-</template>
-
-<script setup lang="ts">
-import Header from './components/layout/Header.vue';
-</script> -->
-
 <template>
   <div class="app-wrapper">
-    <Header v-if="!isAdminPage" />
+    <Header v-if="shouldShowHeaderAndFooter" />
 
     <main>
       <router-view />
     </main>
     <GlobalToast />
 
-    <Footer v-if="!isAdminPage" />
+    <Footer v-if="shouldShowHeaderAndFooter" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-// Đảm bảo bạn đã import Header và Footer đúng đường dẫn của bạn nhé
+
 import Header from './modules/shop/layout/Header.vue' 
 import Footer from './modules/shop/layout/Footer.vue' 
 import GlobalToast from './common/components/GlobalToast.vue'
 
 const route = useRoute()
 
-// Biến kiểm tra xem đường dẫn hiện tại có bắt đầu bằng '/admin' không
-const isAdminPage = computed(() => {
-  return route.path.toLowerCase().startsWith('/admin')
+// Định nghĩa logic mới để kiểm tra xem có nên hiện Header/Footer hay không
+const shouldShowHeaderAndFooter = computed(() => {
+  const path = route.path.toLowerCase()
+  
+  // 1. Nếu là trang admin (bắt đầu bằng /admin) -> ẨN
+  if (path.startsWith('/admin')) {
+    return false
+  }
+  
+  // 2. Nếu là trang đăng nhập hoặc đăng ký -> ẨN
+  if (path === '/login' || path === '/register') {
+    return false
+  }
+  
+  // 3. Các trang mua sắm bình thường khác của khách -> HIỆN
+  return true
 })
 </script>
 

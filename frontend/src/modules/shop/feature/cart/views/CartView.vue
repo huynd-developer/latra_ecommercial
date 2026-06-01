@@ -1,40 +1,10 @@
-<script setup lang="ts">
-import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useCartStore } from '../stores/cartStore';
-import CartItem from '../components/CartItem.vue';
-import { useAppStore } from '@/common/store/app.store';
-
-const cartStore = useCartStore();
-const appStore = useAppStore();
-const router = useRouter();
-
-onMounted(() => {
-  cartStore.fetchCart();
-});
-
-const formatVND = (val: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
-
-const proceedToCheckout = () => {
-  // Check nếu BE trả về có món nào isAvailable === false
-  const hasError = cartStore.cartData?.items.some(i => i.isAvailable === false);
-  
-  if (hasError) {
-    appStore.notifyError("Giỏ hàng có sản phẩm hết hàng. Vui lòng xóa trước khi thanh toán!");
-    return;
-  }
-  // Mở khóa bay sang trang Checkout!
-  router.push('/checkout');
-};
-</script>
-
 <template>
   <div class="bg-gray-50 py-5" style="min-height: 80vh; background-color: #f8f9fa;">
     <div class="container max-w-7xl mx-auto px-lg-4">
       
       <div class="mb-4 d-flex align-items-baseline">
         <h2 class="fw-bolder text-dark mb-0 tracking-tight">Giỏ hàng</h2>
-        <span class="ms-3 text-secondary fw-medium">({{ cartStore.totalItemsCount }} sản phẩm)</span>
+        <span class="ms-3 text-secondary fw-medium">({{ cartStore.totalItemsCount || 0 }} sản phẩm)</span>
       </div>
 
       <div class="row g-4">
@@ -53,7 +23,7 @@ const proceedToCheckout = () => {
               <p>Đang tải giỏ hàng...</p>
             </div>
             
-            <div v-else-if="!cartStore.cartData || cartStore.cartData.items.length === 0" class="p-5 text-center my-5">
+            <div v-else-if="!cartStore.cartData || !cartStore.cartData?.items?.length" class="p-5 text-center my-5">
               <i class="bi bi-cart-x display-1 text-slate-300 mb-4 d-block"></i>
               <h5 class="fw-bold text-dark">Giỏ hàng của bạn đang trống</h5>
               <p class="text-secondary mb-4">Hãy chọn thêm sản phẩm để mua sắm nhé!</p>
@@ -93,12 +63,13 @@ const proceedToCheckout = () => {
             <button 
               @click="proceedToCheckout"
               class="btn w-100 py-3 rounded-pill fw-bold fs-6 shadow d-flex justify-content-center align-items-center gap-2 transition-all"
-              :class="(cartStore.cartData?.items.some(i => i.isAvailable === false) || !cartStore.cartData?.items.length) ? 'btn-secondary disabled' : 'btn-danger text-white'"
+              :class="(cartStore.cartData?.items?.some(i => i?.isAvailable === false) || !cartStore.cartData?.items?.length) ? 'btn-secondary' : 'btn-danger text-white'"
+              :disabled="!cartStore.cartData?.items?.length || cartStore.cartData?.items?.some(i => i?.isAvailable === false)"
             >
               TIẾN HÀNH THANH TOÁN
             </button>
 
-            <div v-if="cartStore.cartData?.items.some(i => i.isAvailable === false)" class="alert alert-danger mt-3 mb-0 small fw-medium py-2 text-center border-0 bg-danger bg-opacity-10 rounded-3">
+            <div v-if="cartStore.cartData?.items?.some(i => i?.isAvailable === false)" class="alert alert-danger mt-3 mb-0 small fw-medium py-2 text-center border-0 bg-danger bg-opacity-10 rounded-3">
               <i class="bi bi-exclamation-triangle-fill"></i> Vui lòng loại bỏ các sản phẩm hết hàng để tiếp tục!
             </div>
             
@@ -121,3 +92,45 @@ const proceedToCheckout = () => {
 <style scoped>
 .transition-all { transition: all 0.3s ease; }
 </style>
+
+<script setup lang="ts">
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useCartStore } from '../stores/cartStore';
+import CartItem from '../components/CartItem.vue';
+import { useAppStore } from '@/common/store/app.store';
+
+const cartStore = useCartStore();
+const appStore = useAppStore();
+const router = useRouter();
+
+onMounted(() => {
+  if (typeof cartStore.fetchCart === 'function') {
+    cartStore.fetchCart();
+  }
+});
+
+const formatVND = (val: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+
+// SỬA TẠI ĐÂY: Hàm logic mới chặn đứng hoàn toàn mọi trường hợp gây crash trang (Guard Clauses)
+const proceedToCheckout = () => {
+  const items = cartStore.cartData?.items;
+  
+  // Trường hợp 1: Giỏ hàng chưa load xong hoặc không có items nào
+  if (!items || items.length === 0) {
+    appStore.notifyError("Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm!");
+    return;
+  }
+  
+  // Trường hợp 2: Có sản phẩm trong list bị hết hàng (Check an toàn với i?.isAvailable)
+  const hasError = items.some((i: any) => i?.isAvailable === false);
+  
+  if (hasError) {
+    appStore.notifyError("Giỏ hàng có sản phẩm hết hàng. Vui lòng xóa trước khi thanh toán!");
+    return;
+  }
+  
+  // Trường hợp 3: Mọi thứ hoàn hảo -> Cho phép qua trang checkout
+  router.push('/checkout');
+};
+</script>
