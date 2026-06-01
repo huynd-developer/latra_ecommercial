@@ -1,4 +1,3 @@
-// backend/src/main/java/trungdevcode/latra/modules/inventory/service/ImeiService.java
 package trungdevcode.latra.modules.inventory.service;
 
 import trungdevcode.latra.enums.ImeiStatus;
@@ -13,4 +12,7 @@ public interface ImeiService {
     // Chuyển newStatus thành kiểu Enum để Spring tự ép kiểu, chặn lỗi nhập linh tinh
     void changeImeiStatus(Long id, ImeiStatus newStatus);
     void releaseImeisAfterRefund(Long orderId);
+
+    // Bổ sung hàm lấy list IMEI theo Product ID cho màn hình POS
+    List<ImeiResponseDTO> getAvailableImeisByProductId(Long productId);
 }

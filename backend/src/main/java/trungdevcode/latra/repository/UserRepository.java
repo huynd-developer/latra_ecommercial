@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import trungdevcode.latra.modules.user.dto.EmployeeDTO;
 import trungdevcode.latra.entity.User;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -22,34 +23,29 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmailAndIdNot(String email, Long id);
     boolean existsByPhoneAndIdNot(String phone, Long id);
 
-    @Query(value = "SELECT u.* FROM users u " +
-            "LEFT JOIN user_role ur ON u.id = ur.user_id " +
-            "WHERE (ur.role_id = 3 OR ur.role_id IS NULL) " +
-            "AND u.status != 2 ORDER BY u.id DESC", nativeQuery = true)
+    @Query(value = "SELECT * FROM users WHERE (role = 'USER' OR role IS NULL) AND status != 2 ORDER BY id DESC", nativeQuery = true)
     List<User> findAllCustomersOnly();
 
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO user_role (user_id, role_id) VALUES (:userId, 3)", nativeQuery = true)
+    @Query(value = "INSERT INTO user_roles (user_id, role_id) VALUES (:userId, 4)", nativeQuery = true)
     void assignCustomerRole(@Param("userId") Long userId);
 
-    // Sửa DESC thành ASC để sắp xếp từ cũ nhất đến mới nhất (NV001 -> NV012...)
-    @Query(value = "SELECT u.* FROM users u " +
-            "JOIN user_role ur ON u.id = ur.user_id " +
-            "WHERE ur.role_id IN (1, 2) AND u.status != 2 ORDER BY u.id ASC", nativeQuery = true)
+    // FIX: Bỏ ADMIN, chỉ quét đúng 3 role nhân viên thực tế của bạn
+    @Query(value = "SELECT * FROM users WHERE role IN ('OWNER', 'MANAGER', 'CASHIER') AND status != 2 ORDER BY id ASC", nativeQuery = true)
     List<User> findAllEmployeesOnly();
 
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO user_role (user_id, role_id) VALUES (:userId, :roleId)", nativeQuery = true)
+    @Query(value = "INSERT INTO user_roles (user_id, role_id) VALUES (:userId, :roleId)", nativeQuery = true)
     void assignRoleToUser(@Param("userId") Long userId, @Param("roleId") Long roleId);
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE user_role SET role_id = :roleId WHERE user_id = :userId", nativeQuery = true)
+    @Query(value = "UPDATE user_roles SET role_id = :roleId WHERE user_id = :userId", nativeQuery = true)
     void updateUserRole(@Param("userId") Long userId, @Param("roleId") Long roleId);
 
-    @Query(value = "SELECT TOP 1 role_id FROM user_role WHERE user_id = :userId", nativeQuery = true)
+    @Query(value = "SELECT TOP 1 role_id FROM user_roles WHERE user_id = :userId", nativeQuery = true)
     Long findRoleIdByUserId(@Param("userId") Long userId);
 
     default List<EmployeeDTO> getAllEmployees() {
@@ -65,10 +61,29 @@ public interface UserRepository extends JpaRepository<User, Long> {
             dto.setAddress(u.getAddress());
             dto.setStatus(u.getStatus() != null ? u.getStatus() : 1);
 
-            Long roleId = findRoleIdByUserId(u.getId());
+            // FIX LOGIC: Chỉ map đúng 3 role thực tế
+            String currentRole = u.getRole();
+            Long roleId = 3L; // Mặc định không khớp thì là CASHIER
+
+            if (currentRole != null) {
+                switch (currentRole.toUpperCase()) {
+                    case "OWNER":
+                        roleId = 1L;
+                        break;
+                    case "MANAGER":
+                        roleId = 2L;
+                        break;
+                    case "CASHIER":
+                        roleId = 3L;
+                        break;
+                }
+            }
             dto.setRoleId(roleId);
 
             return dto;
         }).collect(Collectors.toList());
     }
+
+    @Query("SELECT u FROM User u WHERE u.username = :loginId OR u.email = :loginId OR u.phone = :loginId")
+    Optional<User> findByLoginId(@Param("loginId") String loginId);
 }

@@ -1,9 +1,9 @@
-// backend/src/main/java/trungdevcode/latra/modules/brand/controller/BrandController.java
 package trungdevcode.latra.modules.brand.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import trungdevcode.latra.common.response.ApiResponse;
@@ -21,28 +21,38 @@ public class BrandController {
     private final BrandService brandService;
 
     @GetMapping
+    // Không chặn quyền: POS của Thu ngân hoặc App của Khách hàng đều gọi được để load bộ lọc
     public ResponseEntity<ApiResponse<List<Brand>>> getAllBrands() {
         return ResponseEntity.ok(ApiResponse.success(brandService.getAllBrands(), "Lấy danh sách thành công"));
     }
 
-    @PostMapping("/admin")
+    @PostMapping
+    // 🛠️ ĐÃ SỬA BỎ /admin: URL gọn gàng -> POST /api/v1/brands
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'OWNER')")
     public ResponseEntity<ApiResponse<Brand>> createBrand(@Valid @RequestBody BrandRequestDTO request) {
         return ResponseEntity.ok(ApiResponse.success(brandService.createBrand(request), "Tạo thương hiệu thành công"));
     }
 
-    @PutMapping("/admin/{id}")
+    @PutMapping("/{id}")
+    // 🛠️ ĐÃ SỬA BỎ /admin: URL gọn gàng -> PUT /api/v1/brands/{id}
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'OWNER')")
     public ResponseEntity<ApiResponse<Brand>> updateBrand(
             @PathVariable Long id,
             @Valid @RequestBody BrandRequestDTO request) {
         return ResponseEntity.ok(ApiResponse.success(brandService.updateBrand(id, request), "Cập nhật thành công"));
     }
 
-    @DeleteMapping("/admin/{id}")
+    @DeleteMapping("/{id}")
+    // 🛠️ ĐÃ SỬA BỎ /admin: URL gọn gàng -> DELETE /api/v1/brands/{id}
+    @PreAuthorize("hasAuthority('OWNER')")
     public ResponseEntity<ApiResponse<Void>> deleteBrand(@PathVariable Long id) {
         brandService.deleteBrand(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Đã khóa thương hiệu thành công"));
     }
-    @PostMapping("/admin/{id}/logo")
+
+    @PostMapping("/{id}/logo")
+    // 🛠️ ĐÃ SỬA BỎ /admin: URL gọn gàng -> POST /api/v1/brands/{id}/logo
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'OWNER')")
     public ResponseEntity<ApiResponse<String>> uploadLogo(
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file) throws Exception {

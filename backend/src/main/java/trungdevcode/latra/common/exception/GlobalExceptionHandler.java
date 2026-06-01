@@ -3,12 +3,15 @@ package trungdevcode.latra.common.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import trungdevcode.latra.common.response.ApiResponse;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -39,5 +42,23 @@ public class GlobalExceptionHandler {
         ex.printStackTrace(); // In ra console để Dev sửa
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(500, "Lỗi hệ thống không xác định: " + ex.getMessage()));
+    }
+    // Import cái này ở đầu file:
+    // import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+    // Bắt lỗi gọi sai đường dẫn API (404 Not Found)
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleNotFoundException(NoResourceFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(404, "Đường dẫn API không tồn tại: " + ex.getResourcePath()));
+    }
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AuthorizationDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of(
+                        "status", 403,
+                        "error", "Forbidden",
+                        "message", "Bạn không có quyền thực hiện hành động này! Vui lòng liên hệ Owner/Manager."
+                ));
     }
 }

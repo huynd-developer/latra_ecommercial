@@ -28,4 +28,9 @@ public interface ImeiRepository extends JpaRepository<Imei, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT i FROM Imei i WHERE i.variant = :variant AND i.status = :status")
     List<Imei> findAvailableImeisWithLock(@Param("variant") ProductVariant variant, @Param("status") ImeiStatus status);
+
+    // =========================================================================
+    // HÀM MỚI BỔ SUNG ĐỂ TÌM TẤT CẢ IMEI CỦA MỘT SẢN PHẨM (DỰA VÀO PRODUCT_ID)
+    // =========================================================================
+    List<Imei> findByVariantProductIdAndStatus(Long productId, ImeiStatus status);
 }

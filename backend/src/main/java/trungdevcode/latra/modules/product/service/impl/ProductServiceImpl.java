@@ -96,11 +96,37 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    // --- BẮT ĐẦU ĐOẠN SỬA ĐỔI CHO LOGIC PHÂN TÁCH API ---
+
     @Override
     public Map<String, Object> getAllProducts(int page, int size) {
+        // Giữ lại để tương thích ngược, điều hướng thẳng về luồng Public
+        return getAllProductsPublic(page, size);
+    }
+
+    @Override
+    public Map<String, Object> getAllProductsPublic(int page, int size) {
         Pageable paging = PageRequest.of(page, size);
+
+        // Vì hàm deleteProduct của bạn đặt status = 0 để xóa mềm,
+        // nên hàng đang bán (Active) mặc định sẽ mang status = 1.
+        Page<Product> pageProducts = productRepository.findByStatus(1, paging);
+
+        return buildProductPaginationResponse(pageProducts);
+    }
+
+    @Override
+    public Map<String, Object> getAllProductsAdmin(int page, int size) {
+        Pageable paging = PageRequest.of(page, size);
+
+        // Admin & POS được quyền quét/xem toàn bộ sản phẩm trong DB (kể cả hàng status = 0)
         Page<Product> pageProducts = productRepository.findAll(paging);
 
+        return buildProductPaginationResponse(pageProducts);
+    }
+
+    // Hàm tiện ích bọc dữ liệu phân trang dùng chung cho cả 2 API (Tránh lặp code)
+    private Map<String, Object> buildProductPaginationResponse(Page<Product> pageProducts) {
         List<ProductResponse> productDTOs = pageProducts.getContent().stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
@@ -112,6 +138,8 @@ public class ProductServiceImpl implements ProductService {
         response.put("totalPages", pageProducts.getTotalPages());
         return response;
     }
+
+    // --- KẾT THÚC ĐOẠN SỬA ĐỔI ---
 
     @Override
     @Transactional

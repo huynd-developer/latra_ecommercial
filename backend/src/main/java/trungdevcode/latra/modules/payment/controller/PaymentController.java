@@ -1,4 +1,3 @@
-// backend/src/main/java/trungdevcode/latra/modules/payment/controller/PaymentController.java
 package trungdevcode.latra.modules.payment.controller;
 
 import lombok.RequiredArgsConstructor;
@@ -16,12 +15,12 @@ public class PaymentController {
 
     /**
      * VNPAY IPN (Instant Payment Notification)
-     * API này VNPAY tự động gọi ngầm tới Server của bạn, Front-end KHÔNG GỌI API NÀY.
-     * VNPAY gửi dữ liệu dưới dạng GET request với Query Params.
+     * LƯU Ý ĐẶC BIỆT: Giữ nguyên KHÔNG thêm @PreAuthorize ở đây.
+     * Vì API này do Server VNPAY gọi ngầm (họ không có JWT Token của chúng ta),
+     * việc cấu hình mở public ở SecurityConfig là hoàn toàn chính xác theo nghiệp vụ thực tế.
      */
     @GetMapping("/vnpay-ipn")
     public Map<String, String> vnpayIpn(@RequestParam Map<String, String> params) {
-        // Trả về JSON theo đúng chuẩn mà VNPAY yêu cầu
         return paymentService.processVnPayIpn(params);
     }
 }

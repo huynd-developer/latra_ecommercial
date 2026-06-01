@@ -11,9 +11,14 @@ public interface ProductService {
     ProductResponse getProductById(Long id);
     ProductResponse createProduct(ProductRequest request);
     Map<String, Object> getAllProducts(int page, int size);
+    Map<String, Object> getAllProductsPublic(int page, int size);
+
+    // 🔑 Hàm mới cho Admin, Quản lý và Thu ngân làm POS
+    Map<String, Object> getAllProductsAdmin(int page, int size);
     ProductResponse updateProduct(Long id, ProductRequest request);
     void deleteProduct(Long id);
     String uploadImage(Long productId, MultipartFile file) throws Exception;
     void deleteProductImage(Long imageId);
     void setMainImage(Long productId, Long imageId);
+
 }

@@ -2,6 +2,7 @@ package trungdevcode.latra.modules.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import trungdevcode.latra.modules.user.dto.EmployeeDTO;
 import trungdevcode.latra.modules.user.service.EmployeeService;
@@ -10,37 +11,35 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/nhanViens")
-@CrossOrigin(origins = "http://localhost:5173") // 🔥 THÊM CORS ĐỂ VUE.JS GỌI ĐƯỢC
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('OWNER')")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
 
     @GetMapping
     public ResponseEntity<List<EmployeeDTO>> getAll() {
-        // 🔥 SỬA CHUẨN KIẾN TRÚC: Phải gọi hàm của Service, không gọi tắt qua Repository
-        // LƯU Ý: Nếu trong EmployeeService chưa có hàm này, ông nhớ tạo thêm nhé!
         return ResponseEntity.ok(employeeService.getAllEmployees());
     }
 
     @PostMapping
     public ResponseEntity<String> add(@RequestBody EmployeeDTO dto) {
-        // 🔥 Đã xóa try-catch, GlobalExceptionHandler sẽ tự bắt lỗi ném về Vue
         employeeService.addEmployee(dto);
         return ResponseEntity.ok("Thêm nhân viên thành công!");
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<String> update(
-            @PathVariable("id") Long id, // 🔥 FIX LỖI 400: Thêm "id" vào ngoặc
+            @PathVariable("id") Long id,
             @RequestBody EmployeeDTO dto) {
         employeeService.updateEmployee(id, dto);
-        return ResponseEntity.ok("Cập nhật thành công!");
+        return ResponseEntity.ok("Cập nhật thông tin nhân viên thành công!");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable("id") Long id) { // 🔥 FIX LỖI 400: Thêm "id" vào ngoặc
+    public ResponseEntity<String> delete(@PathVariable("id") Long id) {
         employeeService.deleteEmployee(id);
-        return ResponseEntity.ok("Xóa nhân viên vĩnh viễn thành công!");
+        // ĐÃ FIX: Sửa lại chữ cho đúng bản chất Soft Delete bên dưới Service
+        return ResponseEntity.ok("Đã chuyển trạng thái nhân viên thành ngừng hoạt động!");
     }
 }

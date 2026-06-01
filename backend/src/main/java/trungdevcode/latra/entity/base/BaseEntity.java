@@ -36,4 +36,8 @@ public abstract class BaseEntity {
     @LastModifiedBy
     @Column(name = "updated_by")
     private String updatedBy;
+
+    // Thêm @Column để ép DB tạo giá trị mặc định là 0 (False) cho tất cả các bảng
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "bit default 0")
+    private Boolean isDeleted = false;
 }

@@ -1,6 +1,7 @@
 package trungdevcode.latra.modules.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import trungdevcode.latra.modules.user.dto.EmployeeDTO;
@@ -12,11 +13,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class EmployeeService {
-    public final UserRepository userRepository;
-    // Thêm vào trong EmployeeService.java
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
     public List<EmployeeDTO> getAllEmployees() {
-        return userRepository.getAllEmployees(); // Logic xử lý nằm ở đây mới chuẩn!
+        return userRepository.getAllEmployees();
     }
+
     @Transactional
     public void addEmployee(EmployeeDTO dto) {
         validateEmployeeData(dto, false);
@@ -38,18 +42,27 @@ public class EmployeeService {
         user.setEmail(dto.getEmail().trim());
         user.setAddress(dto.getAddress());
         user.setStatus(dto.getStatus() != null ? dto.getStatus() : 1);
-        user.setPassword("123456");
+
+        // 🔥 FIX LOGIC 1: Ép chuỗi Role vào bảng users dựa theo RoleId để câu lệnh SELECT cũ không bị NULL
+        String roleStr = "CASHIER"; // Mặc định là Thu ngân nếu không truyền
+        if (dto.getRoleId() != null) {
+            if (dto.getRoleId() == 1L) roleStr = "OWNER";
+            else if (dto.getRoleId() == 2L) roleStr = "MANAGER";
+            else if (dto.getRoleId() == 3L) roleStr = "CASHIER";
+        }
+        user.setRole(roleStr);
+
+        user.setPassword(passwordEncoder.encode("123456"));
 
         User savedUser = userRepository.save(user);
 
-        if (dto.getRoleId() != null) {
-            userRepository.assignRoleToUser(savedUser.getId(), dto.getRoleId());
-        }
+        // 🔥 FIX LOGIC 2: Bắn data vào bảng trung gian user_roles đồng bộ với ID
+        Long finalRoleId = dto.getRoleId() != null ? dto.getRoleId() : 3L;
+        userRepository.assignRoleToUser(savedUser.getId(), finalRoleId);
     }
 
     @Transactional
     public void updateEmployee(Long id, EmployeeDTO dto) {
-        // NGHIỆP VỤ: Bảo vệ Super Admin
         if (id == 1L) {
             throw new RuntimeException("Lỗi bảo mật: Bất khả xâm phạm! Không thể sửa thông tin của Super Admin.");
         }
@@ -71,23 +84,28 @@ public class EmployeeService {
         user.setAddress(dto.getAddress());
         if (dto.getStatus() != null) user.setStatus(dto.getStatus());
 
-        userRepository.save(user);
-
+        // 🔥 FIX LOGIC 3: Cập nhật lại chuỗi Role ở bảng users khi nhân viên được đổi chức vụ (Sửa lỗi lệch data)
         if (dto.getRoleId() != null) {
-            userRepository.updateUserRole(id, dto.getRoleId());
+            String roleStr = "CASHIER";
+            if (dto.getRoleId() == 1L) roleStr = "OWNER";
+            else if (dto.getRoleId() == 2L) roleStr = "MANAGER";
+            else if (dto.getRoleId() == 3L) roleStr = "CASHIER";
+
+            user.setRole(roleStr); // Lưu lại chuỗi mới vào bảng users
+            userRepository.updateUserRole(id, dto.getRoleId()); // Cập nhật bảng user_roles
         }
+
+        userRepository.save(user);
     }
 
     @Transactional
     public void deleteEmployee(Long id) {
-        // NGHIỆP VỤ: Bảo vệ Super Admin
         if (id == 1L) {
             throw new RuntimeException("Lỗi bảo mật: Bất khả xâm phạm! Không thể xóa tài khoản Super Admin.");
         }
 
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên!"));
 
-        // Soft Delete: Chuyển trạng thái về 2 (Đã xóa) để ẩn khỏi UI nhưng giữ DB
         user.setStatus(2);
         userRepository.save(user);
     }

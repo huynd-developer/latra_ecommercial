@@ -1,9 +1,9 @@
-// backend/src/main/java/trungdevcode/latra/modules/product/controller/ProductController.java
 package trungdevcode.latra.modules.product.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import trungdevcode.latra.common.response.ApiResponse;
@@ -26,19 +26,32 @@ public class ProductController {
     }
 
     @PostMapping("/admin")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'OWNER')")
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@Valid @RequestBody ProductRequest request) {
         return ResponseEntity.ok(ApiResponse.success(productService.createProduct(request), "Tạo sản phẩm thành công"));
     }
 
+    // 🛒 1. API TRANG CHỦ: Mở tự do cho khách xem (Chỉ xem hàng Active)
     @GetMapping
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAllProducts(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(ApiResponse.success(productService.getAllProducts(page, size), "Lấy danh sách sản phẩm thành công"));
+        return ResponseEntity.ok(ApiResponse.success(productService.getAllProductsPublic(page, size), "Lấy danh sách sản phẩm thành công"));
+    }
+
+    // ⚙️ 2. API ADMIN / POS: Chỉ OWNER, MANAGER, CASHIER được vào lấy (Lấy full hàng ẩn/hiện)
+    @GetMapping("/admin")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'OWNER', 'CASHIER')")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getAllProductsAdmin(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(productService.getAllProductsAdmin(page, size), "Lấy danh sách sản phẩm Admin thành công"));
     }
 
     @PutMapping("/admin/{id}")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'OWNER')")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
             @PathVariable("id") Long id,
             @Valid @RequestBody ProductRequest request) {
@@ -46,12 +59,14 @@ public class ProductController {
     }
 
     @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasAuthority('OWNER')")
     public ResponseEntity<ApiResponse<String>> deleteProduct(@PathVariable("id") Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Đã ẩn sản phẩm thành công!"));
     }
 
     @PostMapping("/admin/{id}/images")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'OWNER')")
     public ResponseEntity<ApiResponse<String>> uploadProductImage(
             @PathVariable("id") Long id,
             @RequestParam("file") MultipartFile file) throws Exception {

@@ -3,6 +3,7 @@ package trungdevcode.latra.modules.user.controller;
 import lombok.RequiredArgsConstructor;
 import trungdevcode.latra.modules.user.dto.CustomerDTO;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import trungdevcode.latra.entity.User;
 import trungdevcode.latra.repository.UserRepository;
@@ -14,6 +15,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/khachHangs")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyAuthority('CASHIER', 'MANAGER', 'OWNER')")
 public class CustomerController {
 
     private final CustomerService customerService;
@@ -27,6 +29,13 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<?> addCustomer(@RequestBody CustomerDTO dto) {
         try {
+            // ĐÃ FIX: Thêm check trùng Username để tránh lỗi 500 từ Database
+            if (dto.getUsername() != null) {
+                // Lưu ý: Đảm bảo trong UserRepository mày có hàm findByUsername(String username) nhé
+                User exUsername = userRepository.findByUsername(dto.getUsername().trim());
+                if (exUsername != null) return ResponseEntity.badRequest().body(Map.of("message", "Tên đăng nhập này đã tồn tại!"));
+            }
+
             if (dto.getEmail() != null) {
                 User exEmail = userRepository.findByEmail(dto.getEmail().trim());
                 if (exEmail != null) return ResponseEntity.badRequest().body(Map.of("message", "Email này đã được đăng ký!"));
@@ -73,6 +82,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'OWNER')")
     public ResponseEntity<?> deleteCustomer(@PathVariable Long id) {
         try {
             customerService.deleteCustomer(id);
