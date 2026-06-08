@@ -79,11 +79,15 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
     let finalNote = `[KH: ${formState.value.customerName} - ${formState.value.customerPhone}] ${formState.value.note || ''}`;
     
     const payload: CheckoutRequest = {
-      userId: 1, 
+      userId: 1, // (Lưu ý: Sau này nhớ đổi số 1 này thành ID của user đang đăng nhập nhé)
       paymentMethod: formState.value.paymentMethod,
       shippingAddress: fullAddress,
       voucherCode: formState.value.voucherCode,
-      note: finalNote.trim()
+      note: finalNote.trim(),
+      
+      // 🌟 THÊM 2 DÒNG NÀY ĐỂ GỬI TÊN VÀ SĐT LÊN BACKEND
+      recipientName: formState.value.customerName,
+      recipientPhone: formState.value.customerPhone
     };
 
     try {
