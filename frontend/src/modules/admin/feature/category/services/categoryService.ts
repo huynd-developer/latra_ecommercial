@@ -10,17 +10,20 @@ export const categoryService = {
   },
 
   createCategory: async (payload: CategoryRequestDTO): Promise<string> => {
-    const res = await request.post<any, ApiResponse<Category>>('/categories/admin', payload);
+    // 🛠️ ĐÃ SỬA: Bỏ /admin, khớp với @PostMapping ở Backend
+    const res = await request.post<any, ApiResponse<Category>>('/categories', payload);
     return res.message;
   },
 
   updateCategory: async (id: number, payload: CategoryRequestDTO): Promise<string> => {
-    const res = await request.put<any, ApiResponse<Category>>(`/categories/admin/${id}`, payload);
+    // 🛠️ ĐÃ SỬA: Bỏ /admin, khớp với @PutMapping("/{id}") ở Backend
+    const res = await request.put<any, ApiResponse<Category>>(`/categories/${id}`, payload);
     return res.message;
   },
 
   deleteCategory: async (id: number): Promise<string> => {
-    const res = await request.delete<any, ApiResponse<string>>(`/categories/admin/${id}`);
+    // 🛠️ ĐÃ SỬA: Bỏ /admin, khớp với @DeleteMapping("/{id}") ở Backend
+    const res = await request.delete<any, ApiResponse<string>>(`/categories/${id}`);
     return res.message;
   }
 };

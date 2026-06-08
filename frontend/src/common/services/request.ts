@@ -50,7 +50,13 @@ request.interceptors.response.use(
     // Xử lý lỗi 403 (Cấm truy cập)
     if (error.response && error.response.status === 403) {
       const errorData: any = error.response.data;
-      alert(errorData?.message || "Bạn không có quyền thực hiện hành động này!");
+      
+      // Đã tắt cái alert quê mùa này đi
+      // alert(errorData?.message || "Bạn không có quyền thực hiện hành động này!"); 
+      
+      // Ghi log ngầm ra console để dev dễ fix bug
+      console.error("Lỗi 403 Forbidden:", errorData?.message); 
+      
       return Promise.reject(error);
     }
 

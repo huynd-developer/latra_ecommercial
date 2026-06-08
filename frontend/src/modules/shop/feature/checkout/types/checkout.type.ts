@@ -22,6 +22,8 @@ export interface CheckoutRequest {
   shippingAddress: string;
   voucherCode: string | null;
   note: string;
+  recipientName: string;
+  recipientPhone: string;
 }
 
 export interface CheckoutResponse {

@@ -1,7 +1,52 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import { useCheckoutStore } from '../stores/checkoutStore';
+// 🌟 CHUẨN BÀI: Import userService vào để bốc data, không gọi request trực tiếp nữa
+import { userService } from '../services/userService';
 
 const checkoutStore = useCheckoutStore();
+
+onMounted(async () => {
+  try {
+    // 1. Gọi xuống tầng Service để lấy thông tin User
+    const res = await userService.getCurrentUser();
+    
+    // 2. Bóc tách data từ format chuẩn ApiResponse của Spring Boot (res.data)
+    const userData = res?.data; 
+    console.log("=== DỮ LIỆU USER ĐỒNG BỘ THÀNH CÔNG ===", userData);
+
+    if (userData) {
+  // Điền thông tin cơ bản
+  if (!checkoutStore.formState.customerName) checkoutStore.formState.customerName = userData.fullName || ''; 
+  if (!checkoutStore.formState.customerPhone) checkoutStore.formState.customerPhone = userData.phone || '';
+  if (!checkoutStore.formState.customerEmail) checkoutStore.formState.customerEmail = userData.email || '';
+  
+  // 🌟 TRICK CHẺ CHUỖI ĐỊA CHỈ:
+  if (userData.address) {
+    // Tách chuỗi dựa vào dấu phẩy (,) và xóa khoảng trắng thừa ở 2 đầu
+    const addressParts = userData.address.split(',').map((item: string) => item.trim());
+    
+    // Nếu chuỗi có đủ 4 phần trở lên (Ví dụ: [0]="sadas", [1]="Đại Thành", [2]="Quốc Oai", [3]="Hà Nội")
+    if (addressParts.length >= 4) {
+      // Đảo ngược lại thứ tự để điền từ Tỉnh -> Quận -> Phường -> Số nhà
+      // Dùng .pop() để lấy từ cuối mảng (Hà Nội) lên dần
+      if (!checkoutStore.formState.province) checkoutStore.formState.province = addressParts.pop() || '';
+      if (!checkoutStore.formState.district) checkoutStore.formState.district = addressParts.pop() || '';
+      if (!checkoutStore.formState.ward) checkoutStore.formState.ward = addressParts.pop() || '';
+      
+      // Phần còn lại gộp hết vào Số nhà (phòng trường hợp số nhà có chứa dấu phẩy)
+      if (!checkoutStore.formState.street) checkoutStore.formState.street = addressParts.join(', ') || '';
+    } else {
+      // Rủi ro: Nếu khách nhập địa chỉ quá ngắn (không đủ dấu phẩy), nhét tất cả vào ô Số nhà như cũ
+      if (!checkoutStore.formState.street) checkoutStore.formState.street = userData.address || '';
+    }
+  }
+}
+  } catch (error) {
+    // Nếu có lỗi (hết hạn token hoặc backend sập), in ra lỗi để dev dễ debug
+    console.error("🚨 Lỗi tự động điền thông tin khách hàng:", error);
+  }
+});
 </script>
 
 <template>
