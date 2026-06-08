@@ -12,4 +12,7 @@ public class WebCheckoutRequestDTO {
 
     // 👉 ĐÃ THÊM: Cho phép khách áp mã giảm giá
     private String voucherCode;
+
+    private String recipientName;
+    private String recipientPhone;
 }

@@ -27,6 +27,15 @@ public class VoucherServiceImpl implements VoucherService {
     private final VoucherRepository voucherRepository;
     private final OrderRepository orderRepository;
 
+    // =========================================================================
+    // 🔥 UTILITY METHOD: Chuẩn hóa mã giảm giá (Xóa toàn bộ khoảng trắng + Viết hoa)
+    // giúp hệ thống nhận diện đúng thực tế kể cả khi khách nhập "giam 1 ", "Giam1"
+    // =========================================================================
+    private String normalizeCode(String code) {
+        if (code == null) return "";
+        return code.replaceAll("\\s+", "").toUpperCase();
+    }
+
     @Override
     public List<Voucher> getAllVouchers() {
         return voucherRepository.findAll();
@@ -41,7 +50,6 @@ public class VoucherServiceImpl implements VoucherService {
             throw new BusinessException(ErrorCode.INVALID_DATA, "Ngày kết thúc phải ở tương lai");
         }
 
-        // LƯU Ý: Frontend truyền chuỗi "PERCENTAGE", backend map sang Enum
         DiscountType reqDiscountType;
         VoucherCategory reqCategory;
         try {
@@ -60,7 +68,8 @@ public class VoucherServiceImpl implements VoucherService {
             }
         }
 
-        voucher.setCode(request.getCode().trim().toUpperCase()); // Chuẩn hóa mã
+        // 🛠️ ĐÃ SỬA LOGIC: Sử dụng normalizeCode thay vì .trim() để lưu sạch vào DB
+        voucher.setCode(normalizeCode(request.getCode()));
         voucher.setDiscountType(reqDiscountType);
         voucher.setCategory(reqCategory);
         voucher.setValue(request.getValue());
@@ -74,14 +83,14 @@ public class VoucherServiceImpl implements VoucherService {
         }
         voucher.setStartDate(request.getStartDate());
         voucher.setExpiredAt(request.getExpiredAt());
-        voucher.setStatus(1); // Mặc định Active
+        voucher.setStatus(1);
     }
 
     @Override
     @Transactional
     public Voucher createVoucher(VoucherRequestDTO request) {
-        // 🔥 FIX LỖI "cannot find symbol": Thay isUpdate=false bằng gọi hàm logic
-        if (voucherRepository.existsByCode(request.getCode().trim().toUpperCase())) {
+        // 🛠️ ĐÃ SỬA LOGIC: Check trùng mã bằng normalizeCode
+        if (voucherRepository.existsByCode(normalizeCode(request.getCode()))) {
             throw new BusinessException(ErrorCode.INVALID_DATA, "Mã Voucher đã tồn tại");
         }
         Voucher voucher = new Voucher();
@@ -95,8 +104,8 @@ public class VoucherServiceImpl implements VoucherService {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.VOUCHER_NOT_FOUND));
 
-        // Cần đảm bảo có hàm existsByCodeAndIdNot trong repo
-        if (voucherRepository.existsByCodeAndIdNot(request.getCode().trim().toUpperCase(), id)) {
+        // 🛠️ ĐÃ SỬA LOGIC: Check trùng khi cập nhật bằng normalizeCode
+        if (voucherRepository.existsByCodeAndIdNot(normalizeCode(request.getCode()), id)) {
             throw new BusinessException(ErrorCode.INVALID_DATA, "Mã bị trùng với voucher khác");
         }
         mapDtoToEntity(voucher, request, true);
@@ -108,14 +117,14 @@ public class VoucherServiceImpl implements VoucherService {
     public void deleteVoucher(Long id) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.VOUCHER_NOT_FOUND));
-        // Soft delete bằng cách set status = 0 thay vì lùi expired_at
         voucher.setStatus(0);
         voucherRepository.save(voucher);
     }
 
     @Override
     public Map<String, Object> checkVoucher(String code, BigDecimal orderTotal, Long userId) {
-        Voucher voucher = voucherRepository.findByCodeAndStatus((code.trim().toUpperCase()), 1)
+        // 🛠️ ĐÃ SỬA LOGIC: Tìm kiếm Voucher bằng normalizeCode giúp bẻ gãy mọi khoảng trắng lỗi
+        Voucher voucher = voucherRepository.findByCodeAndStatus(normalizeCode(code), 1)
                 .orElseThrow(() -> new BusinessException(ErrorCode.VOUCHER_NOT_FOUND));
 
         LocalDateTime now = LocalDateTime.now();
@@ -143,7 +152,6 @@ public class VoucherServiceImpl implements VoucherService {
             }
         }
 
-        // Không giảm quá tổng tiền
         if (discountAmount.compareTo(orderTotal) > 0) discountAmount = orderTotal;
 
         Map<String, Object> response = new HashMap<>();
@@ -167,7 +175,8 @@ public class VoucherServiceImpl implements VoucherService {
         for (String code : codes) {
             this.checkVoucher(code, orderTotal, userId);
 
-            Voucher voucher = voucherRepository.findByCodeAndStatus(code.trim().toUpperCase(), 1).get();
+            // 🛠️ ĐÃ SỬA LOGIC: Đồng bộ normalizeCode tại đây để tránh lỗi NoSuchElementException (.get()) lúc tính toán gộp mã
+            Voucher voucher = voucherRepository.findByCodeAndStatus(normalizeCode(code), 1).get();
 
             if (!appliedCategories.add(voucher.getCategory())) {
                 throw new BusinessException(ErrorCode.INVALID_DATA, "Chỉ dùng 1 mã loại " + voucher.getCategory().name());
@@ -187,7 +196,7 @@ public class VoucherServiceImpl implements VoucherService {
 
             remainingTotal = remainingTotal.subtract(discountAmount);
             totalDiscount = totalDiscount.add(discountAmount);
-            discountDetails.put(code, discountAmount);
+            discountDetails.put(voucher.getCode(), discountAmount); // Dùng mã sạch từ DB làm key
         }
 
         return VoucherStackingResponseDTO.builder()
@@ -200,10 +209,10 @@ public class VoucherServiceImpl implements VoucherService {
     public List<VoucherAnalyticsDTO> getVoucherAnalytics() {
         return voucherRepository.getVoucherAnalytics();
     }
+
     @Override
     public List<Voucher> getActiveVouchers() {
         LocalDateTime now = LocalDateTime.now();
-        // Trả về các mã đang Active (status = 1) và còn hạn sử dụng
         return voucherRepository.findByStatus(1).stream()
                 .filter(v -> v.getUsageLimit() > 0
                         && now.isAfter(v.getStartDate())

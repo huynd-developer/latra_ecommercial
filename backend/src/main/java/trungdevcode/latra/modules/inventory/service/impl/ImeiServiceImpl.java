@@ -11,6 +11,7 @@ import trungdevcode.latra.modules.inventory.service.ImeiService;
 import trungdevcode.latra.repository.ImeiRepository;
 import trungdevcode.latra.repository.ProductVariantRepository;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -26,26 +27,85 @@ public class ImeiServiceImpl implements ImeiService {
 
     @Override
     public List<ImeiResponseDTO> findAllImeis() {
-        return imeiRepository.findAll().stream().map(imei -> {
-            ProductVariant variant = imei.getVariant();
-            String prodName = (variant != null && variant.getProduct() != null) ? variant.getProduct().getName() : "N/A";
-            String varName = (variant != null) ? (variant.getColor() + " - " + variant.getStorage()) : "N/A";
-
-            return ImeiResponseDTO.builder()
-                    .id(imei.getId())
-                    .imeiCode(imei.getImeiCode())
-                    .status(imei.getStatus().name())
-                    .createdAt(imei.getCreatedAt())
-                    .productName(prodName)
-                    .variantName(varName)
-                    .price(variant != null ? variant.getPrice() : null)
-                    .build();
-        }).collect(Collectors.toList());
+        // 🛠️ Đã tối ưu: Dùng hàm convertToDTO dùng chung cho sạch code
+        return imeiRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
     @Override
+    public List<ImeiResponseDTO> getAvailableImeisByProductId(Long productId) {
+        List<Imei> imeis = imeiRepository.findByVariantProductIdAndStatus(productId, ImeiStatus.AVAILABLE);
+        if (imeis == null || imeis.isEmpty()) {
+            return new ArrayList<>();
+        }
+        // 🛠️ Đã tối ưu: Dùng hàm convertToDTO dùng chung
+        return imeis.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    // =========================================================================
+    // 🔥 RUỘT CỦA HÀM QUÉT MÃ IMEI (CHO POS)
+    // =========================================================================
+    @Override
+    @Transactional(readOnly = true) // Thêm cái này để đọc data nhanh hơn
+    public ImeiResponseDTO getAvailableImeiByCode(String imeiCode) {
+        Imei imei = imeiRepository.findByImeiCodeAndStatus(imeiCode.trim().toUpperCase(), ImeiStatus.AVAILABLE)
+                .orElseThrow(() -> new RuntimeException("Mã IMEI '" + imeiCode + "' không tồn tại hoặc đã bị bán!"));
+
+        // 🛠️ THÊM ĐOẠN NÀY CHẶN LỖI NGHIỆP VỤ: Chặn quét mã các sản phẩm đã ngừng kinh doanh
+        if (imei.getVariant() != null && imei.getVariant().getProduct() != null) {
+            if (imei.getVariant().getProduct().getStatus() != 1) { // 1 là đang bán, khác 1 là ngừng bán
+                throw new RuntimeException("Sản phẩm này đã ngừng kinh doanh, không thể bán!");
+            }
+        }
+
+        return convertToDTO(imei);
+    }
+
+    // =========================================================================
+    // 🛠️ HÀM PHỤ TRỢ: Chuyển đổi dữ liệu và BƠM LINK ẢNH VÀO DTO (BẢN CHUẨN 100%)
+    // =========================================================================
+    private ImeiResponseDTO convertToDTO(Imei imei) {
+        ProductVariant variant = imei.getVariant();
+        String prodName = "N/A";
+        String varName = "N/A";
+        String imgUrl = "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9"; // Ảnh mặc định dự phòng
+
+        if (variant != null) {
+            varName = variant.getColor() + " - " + variant.getStorage();
+            if (variant.getProduct() != null) {
+                prodName = variant.getProduct().getName();
+
+                // 🔥 ĐÃ SỬA CHUẨN THEO ENTITY MỚI CỦA MÀY:
+                // Lấy ra danh sách ảnh của Sản phẩm
+                var images = variant.getProduct().getImages();
+
+                // Kiểm tra xem danh sách ảnh có tồn tại và có ảnh nào bên trong không
+                if (images != null && !images.isEmpty()) {
+                    // Móc lấy cái ảnh đầu tiên (index 0) làm ảnh đại diện
+                    // ⚠️ LƯU Ý: Đổi .getImageUrl() thành đúng tên getter trong file ProductImage.java nhé!
+                    imgUrl = images.get(0).getImageUrl();
+                }
+            }
+        }
+
+        return ImeiResponseDTO.builder()
+                .id(imei.getId())
+                .imeiCode(imei.getImeiCode())
+                .status(imei.getStatus().name())
+                .createdAt(imei.getCreatedAt())
+                .productName(prodName)
+                .variantName(varName)
+                .price(variant != null ? variant.getPrice() : java.math.BigDecimal.ZERO)
+                .imageUrl(imgUrl) // Bơm link ảnh vào đây
+                .build();
+    }
+
+    // -------------------------------------------------------------------------
+    // CÁC HÀM BÊN DƯỚI GIỮ NGUYÊN CODE CỦA MÀY
+    // -------------------------------------------------------------------------
+    @Override
     @Transactional
     public void addImeisToVariant(Long variantId, List<String> imeiCodes) {
+        // ... (Code cũ của mày)
         ProductVariant variant = variantRepository.findById(variantId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phiên bản sản phẩm!"));
 
@@ -81,6 +141,7 @@ public class ImeiServiceImpl implements ImeiService {
     @Override
     @Transactional
     public void deleteImei(Long id) {
+        // ... (Code cũ của mày)
         Imei imei = imeiRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Mã IMEI không tồn tại!"));
 
@@ -98,9 +159,12 @@ public class ImeiServiceImpl implements ImeiService {
     @Override
     @Transactional
     public void changeImeiStatus(Long id, ImeiStatus newStatus) {
+        // ... (Code cũ của mày)
         Imei imei = imeiRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Mã IMEI không tồn tại!"));
-
+        if (newStatus == ImeiStatus.SOLD) {
+            throw new RuntimeException("Không được phép tự ý chuyển trạng thái sang ĐÃ BÁN thủ công! Vui lòng tạo đơn hàng.");
+        }
         if (imei.getStatus() == ImeiStatus.SOLD &&
                 (newStatus != ImeiStatus.RETURNING && newStatus != ImeiStatus.WARRANTY)) {
             throw new RuntimeException("Máy đã bán chỉ có thể chuyển sang trạng thái ĐỔI TRẢ hoặc BẢO HÀNH!");
@@ -124,6 +188,7 @@ public class ImeiServiceImpl implements ImeiService {
     @Override
     @Transactional
     public void releaseImeisAfterRefund(Long orderId) {
+        // ... (Code cũ của mày)
         List<Imei> imeis = imeiRepository.findByOrderId(orderId);
         for (Imei imei : imeis) {
             imei.setStatus(ImeiStatus.AVAILABLE);
@@ -137,34 +202,5 @@ public class ImeiServiceImpl implements ImeiService {
         for (ProductVariant v : variants) {
             updateVariantStock(v);
         }
-    }
-
-    // =========================================================================
-    // HÀM MỚI BỔ SUNG CHO POS (Giải quyết triệt để 404)
-    // =========================================================================
-    @Override
-    public List<ImeiResponseDTO> getAvailableImeisByProductId(Long productId) {
-        List<Imei> imeis = imeiRepository.findByVariantProductIdAndStatus(productId, ImeiStatus.AVAILABLE);
-
-        // NẾU HẾT HÀNG, TRẢ VỀ MẢNG RỖNG THAY VÌ BÁO LỖI
-        if (imeis == null || imeis.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        return imeis.stream().map(imei -> {
-            ProductVariant variant = imei.getVariant();
-            String prodName = (variant != null && variant.getProduct() != null) ? variant.getProduct().getName() : "N/A";
-            String varName = (variant != null) ? (variant.getColor() + " - " + variant.getStorage()) : "N/A";
-
-            return ImeiResponseDTO.builder()
-                    .id(imei.getId())
-                    .imeiCode(imei.getImeiCode())
-                    .status(imei.getStatus().name())
-                    .createdAt(imei.getCreatedAt())
-                    .productName(prodName)
-                    .variantName(varName)
-                    .price(variant != null ? variant.getPrice() : null)
-                    .build();
-        }).collect(Collectors.toList());
     }
 }

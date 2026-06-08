@@ -61,4 +61,10 @@ public class ImeiController {
         List<ImeiResponseDTO> availableImeis = imeiService.getAvailableImeisByProductId(productId);
         return ResponseEntity.ok(ApiResponse.success(availableImeis, "Lấy danh sách IMEI sẵn sàng thành công"));
     }
+    @GetMapping("/scan")
+    @PreAuthorize("hasAnyAuthority('CASHIER', 'MANAGER', 'OWNER')")
+    public ResponseEntity<ApiResponse<ImeiResponseDTO>> scanImei(@RequestParam("code") String imeiCode) {
+        ImeiResponseDTO imei = imeiService.getAvailableImeiByCode(imeiCode);
+        return ResponseEntity.ok(ApiResponse.success(imei, "Tìm thấy thiết bị phù hợp"));
+    }
 }

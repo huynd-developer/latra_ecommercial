@@ -1,4 +1,3 @@
-// backend/src/main/java/trungdevcode/latra/modules/order/service/OrderService.java
 package trungdevcode.latra.modules.order.service;
 
 import org.springframework.data.domain.Page;
@@ -17,5 +16,6 @@ public interface OrderService {
     Order createWebOrder(WebCheckoutRequestDTO request);
 
     // 🔥 LUỒNG POS: Nhân viên dùng súng tít mã vạch tại quầy
-    String checkoutPOS(CheckoutRequestDTO request);
+    // 🛠️ ĐÃ SỬA FULL: Xóa hàm String cũ, chốt kiểu trả về là Order phục vụ cho VNPay QR
+    Order checkoutPOS(CheckoutRequestDTO request);
 }

@@ -1,6 +1,7 @@
 package trungdevcode.latra.repository;
 
 import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -17,8 +18,19 @@ import java.util.Optional;
 @Repository
 public interface ImeiRepository extends JpaRepository<Imei, Long> {
 
-    Optional<Imei> findByImeiCode(String imeiCode);
+    // 🔥 THÊM 3 CÁI @EntityGraph NÀY VÀO ĐỂ TỐI ƯU HIỆU NĂNG, CHỐNG SẬP WEB:
+    @Override
+    @EntityGraph(attributePaths = {"variant", "variant.product", "variant.product.images"})
+    List<Imei> findAll();
 
+    @EntityGraph(attributePaths = {"variant", "variant.product", "variant.product.images"})
+    List<Imei> findByVariantProductIdAndStatus(Long productId, ImeiStatus status);
+
+    @EntityGraph(attributePaths = {"variant", "variant.product", "variant.product.images"})
+    Optional<Imei> findByImeiCodeAndStatus(String imeiCode, ImeiStatus status);
+
+    // ... (Các hàm còn lại giữ nguyên của mày)
+    Optional<Imei> findByImeiCode(String imeiCode);
     long countByVariantAndStatus(ProductVariant variant, ImeiStatus status);
     List<Imei> findByVariantAndStatus(ProductVariant variant, ImeiStatus status);
     boolean existsByImeiCode(String imeiCode);
@@ -28,9 +40,4 @@ public interface ImeiRepository extends JpaRepository<Imei, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT i FROM Imei i WHERE i.variant = :variant AND i.status = :status")
     List<Imei> findAvailableImeisWithLock(@Param("variant") ProductVariant variant, @Param("status") ImeiStatus status);
-
-    // =========================================================================
-    // HÀM MỚI BỔ SUNG ĐỂ TÌM TẤT CẢ IMEI CỦA MỘT SẢN PHẨM (DỰA VÀO PRODUCT_ID)
-    // =========================================================================
-    List<Imei> findByVariantProductIdAndStatus(Long productId, ImeiStatus status);
 }

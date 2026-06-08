@@ -122,12 +122,10 @@ public class OrderServiceImpl implements OrderService {
             // 🔥 FIX LỖI B: Gọi Query Atomic để trừ database trực tiếp thay vì save()
             int updatedRows = voucherRepository.decrementVoucherUsage(appliedVoucher.getCode());
             if (updatedRows == 0) {
-                // Nếu 2 người cùng áp mã cuối cùng, người chậm hơn 1 mili-giây sẽ văng lỗi này và Rollback toàn bộ đơn hàng
                 throw new BusinessException(ErrorCode.VOUCHER_OUT_OF_USAGE, "Mã giảm giá đã hết lượt sử dụng ngay trước đó!");
             }
         }
 
-        // ... (Phần logic lưu Order, Shipment, Cart giữ nguyên như cũ) ...
         order.setUser(user);
         order.setStatus(OrderStatus.PENDING_PAYMENT);
         order.setCreatedAt(LocalDateTime.now());
@@ -154,10 +152,27 @@ public class OrderServiceImpl implements OrderService {
 
         Shipment shipment = new Shipment();
         shipment.setOrder(savedOrder);
-        shipment.setRecipientName(user.getFullName());
-        shipment.setRecipientPhone(user.getPhone());
+
+        // 🌟 LOGIC THỰC TẾ: Ưu tiên lấy Tên/SĐT khách nhập trên form (để mua tặng người thân).
+        // Nếu form gửi lên trống thì mới lấy từ thông tin mặc định của User.
+        String finalName = (request.getRecipientName() != null && !request.getRecipientName().isBlank())
+                ? request.getRecipientName() : user.getFullName();
+
+        String finalPhone = (request.getRecipientPhone() != null && !request.getRecipientPhone().isBlank())
+                ? request.getRecipientPhone() : user.getPhone();
+
+        shipment.setRecipientName(finalName);
+        shipment.setRecipientPhone(finalPhone);
         shipment.setFullAddress(request.getShippingAddress());
         shipment.setStatus(ShipmentStatus.PREPARING);
+
+        // =========================================================================
+        // 🌟 THÊM DÒNG NÀY ĐỂ FIX LỖI UNIQUE CONSTRAINT (NULL) TRÊN SQL SERVER
+        // Tạo mã tạm thời dạng: WAITING-15-1717834520999 (đảm bảo 100% không trùng)
+        // Sau này khi Admin giao cho đơn vị vận chuyển thật sẽ update đè mã thật lên sau.
+        shipment.setTrackingCode("WAITING-" + savedOrder.getId() + "-" + System.currentTimeMillis());
+        // =========================================================================
+
         shipmentRepository.save(shipment);
 
         cart.getItems().clear();
@@ -169,22 +184,31 @@ public class OrderServiceImpl implements OrderService {
     // =========================================================================
     // 2. LUỒNG POS CHECKOUT: Nhân viên quét mã vạch bán tại quầy
     // =========================================================================
+    // =========================================================================
+    // 2. LUỒNG POS CHECKOUT: Nhân viên quét mã vạch bán tại quầy
+    // =========================================================================
     @Override
     @Transactional
-    public String checkoutPOS(CheckoutRequestDTO request) {
+    // 🛠️ ĐÃ SỬA FULL: Thay đổi kiểu trả về từ String thành Order
+    public Order checkoutPOS(CheckoutRequestDTO request) {
         if (request.getScannedImeis() == null || request.getScannedImeis().isEmpty()) {
             throw new BusinessException(ErrorCode.INVALID_DATA, "Chưa quét mã IMEI nào");
         }
 
         User customer = null;
         if (request.getCustomerPhone() != null && !request.getCustomerPhone().isBlank()) {
-            customer = userRepository.findByPhone(request.getCustomerPhone());
+            String cleanPhone = request.getCustomerPhone().trim();
+            customer = userRepository.findByPhone(cleanPhone);
+
             if (customer == null) {
                 customer = new User();
-                customer.setFullName(request.getCustomerName() != null ? request.getCustomerName() : "Khách lẻ");
-                customer.setPhone(request.getCustomerPhone());
-                customer.setUsername(request.getCustomerPhone());
+                customer.setFullName(request.getCustomerName() != null && !request.getCustomerName().isBlank()
+                        ? request.getCustomerName().trim()
+                        : "Khách lẻ " + cleanPhone);
+                customer.setPhone(cleanPhone);
+                customer.setUsername(cleanPhone);
                 customer.setPassword("NO_LOGIN_ALLOWED");
+                customer.setEmail(cleanPhone + "@pos.latra.vn");
                 customer.setStatus(1);
                 customer = userRepository.save(customer);
             }
@@ -203,9 +227,43 @@ public class OrderServiceImpl implements OrderService {
             }
 
             backendCalculatedTotal = backendCalculatedTotal.add(imei.getVariant().getPrice());
-
             variantCountMap.put(imei.getVariant(), variantCountMap.getOrDefault(imei.getVariant(), 0) + 1);
             imeisToUpdate.add(imei);
+        }
+
+        // LOGIC TÍNH TOÁN VÀ ÁP DỤNG VOUCHER CHO LUỒNG CHECKOUT POS
+        Voucher appliedVoucher = null;
+        if (request.getVoucherCode() != null && !request.getVoucherCode().isBlank()) {
+            appliedVoucher = voucherRepository.findByCodeAndStatus(request.getVoucherCode().trim(), 1)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.VOUCHER_NOT_FOUND));
+
+            LocalDateTime now = LocalDateTime.now();
+            if (now.isBefore(appliedVoucher.getStartDate()) || now.isAfter(appliedVoucher.getExpiredAt())) {
+                throw new BusinessException(ErrorCode.VOUCHER_EXPIRED);
+            }
+            if (appliedVoucher.getUsageLimit() <= 0) {
+                throw new BusinessException(ErrorCode.VOUCHER_OUT_OF_USAGE);
+            }
+            if (backendCalculatedTotal.compareTo(appliedVoucher.getMinOrderValue()) < 0) {
+                throw new BusinessException(ErrorCode.VOUCHER_MIN_ORDER_NOT_MET);
+            }
+
+            BigDecimal discountAmount = BigDecimal.ZERO;
+            if (appliedVoucher.getDiscountType() == DiscountType.FIXED_AMOUNT) {
+                discountAmount = appliedVoucher.getValue();
+            } else if (appliedVoucher.getDiscountType() == DiscountType.PERCENTAGE) {
+                discountAmount = backendCalculatedTotal.multiply(appliedVoucher.getValue()).divide(BigDecimal.valueOf(100));
+                if (appliedVoucher.getMaxDiscountAmount() != null && discountAmount.compareTo(appliedVoucher.getMaxDiscountAmount()) > 0) {
+                    discountAmount = appliedVoucher.getMaxDiscountAmount();
+                }
+            }
+
+            backendCalculatedTotal = backendCalculatedTotal.subtract(discountAmount).max(BigDecimal.ZERO);
+
+            int updatedRows = voucherRepository.decrementVoucherUsage(appliedVoucher.getCode());
+            if (updatedRows == 0) {
+                throw new BusinessException(ErrorCode.VOUCHER_OUT_OF_USAGE, "Mã giảm giá đã hết lượt sử dụng ngay trước đó!");
+            }
         }
 
         if (request.getTotalAmount().compareTo(backendCalculatedTotal) != 0) {
@@ -219,9 +277,10 @@ public class OrderServiceImpl implements OrderService {
         order.setUser(customer);
         order.setTotalAmount(backendCalculatedTotal);
         order.setNote(request.getNote());
-        order.setStatus(OrderStatus.COMPLETED);
         order.setCreatedAt(LocalDateTime.now());
+        order.setVoucher(appliedVoucher);
 
+        // Đọc phương thức thanh toán truyền lên từ Frontend POS
         PaymentMethod method;
         try {
             method = PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase());
@@ -229,6 +288,13 @@ public class OrderServiceImpl implements OrderService {
             method = PaymentMethod.CASH;
         }
         order.setPaymentMethod(method);
+
+        // 🛠️ ĐÃ SỬA FULL: Phân luồng trạng thái Đơn hàng dựa trên phương thức thanh toán thực tế tại quầy
+        if (method == PaymentMethod.VNPAY) {
+            order.setStatus(OrderStatus.PENDING_PAYMENT); // Chờ quét QR thanh toán xong mới hoàn thành đơn
+        } else {
+            order.setStatus(OrderStatus.COMPLETED); // Tiền mặt hoặc chuyển khoản thường coi như xong luôn
+        }
 
         if (method == PaymentMethod.SPLIT) {
             order.setCashAmount(request.getCashAmount());
@@ -260,15 +326,21 @@ public class OrderServiceImpl implements OrderService {
             orderDetails.add(detail);
         }
 
+        // 🛠️ ĐÃ SỬA FULL: Phân luồng trạng thái máy IMEI theo nghiệp vụ POS thực tế
         for (Imei imei : imeisToUpdate) {
-            imei.setStatus(ImeiStatus.SOLD);
+            if (method == PaymentMethod.VNPAY) {
+                imei.setStatus(ImeiStatus.LOCKED_FOR_PAYMENT); // Khóa giữ máy, chưa bán đứt vì khách chưa quét tiền
+            } else {
+                imei.setStatus(ImeiStatus.SOLD); // Bán đứt luôn vì thu ngân cầm tiền mặt/đã check tài khoản tinh tinh
+            }
             imei.setOrder(savedOrder);
         }
 
         orderDetailRepository.saveAll(orderDetails);
         imeiRepository.saveAll(imeisToUpdate);
 
-        return "Chốt đơn thành công! Mã Hóa Đơn: #" + savedOrder.getId();
+        // 🛠️ ĐÃ SỬA FULL: Thay vì trả về chuỗi String, return chính thực thể savedOrder để Controller lấy thông tin bắn link QR cho FE
+        return savedOrder;
     }
 
     // =========================================================================
@@ -351,29 +423,25 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException(ErrorCode.INVALID_DATA, "Trạng thái truyền lên không hợp lệ");
         }
 
-        // VALIDATE CỖ MÁY TRẠNG THÁI
         if (oldStatus == OrderStatus.COMPLETED || oldStatus == OrderStatus.CANCELLED) {
             throw new BusinessException(ErrorCode.INVALID_STATUS_TRANSITION, "Đơn hàng đã chốt, không thể thay đổi");
         }
 
-        // LOGIC HỦY ĐƠN
         if (newStatus == OrderStatus.CANCELLED) {
 
-            // 1. Phục hồi tồn kho Variant
             for (OrderDetail detail : order.getOrderDetails()) {
                 ProductVariant variant = detail.getVariant();
                 variant.setStock(variant.getStock() + detail.getQuantity());
                 variantRepository.save(variant);
             }
 
-            // 2. Phục hồi lượt sử dụng Voucher (Nếu có)
+            // 🌟 LUÔN ĐÚNG NGHIỆP VỤ: Nếu đơn hàng tại quầy (POS) bị hủy, lượt dùng Voucher cũng tự động phục hồi cộng lại 1
             if (order.getVoucher() != null) {
                 Voucher voucher = order.getVoucher();
                 voucher.setUsageLimit(voucher.getUsageLimit() + 1);
                 voucherRepository.save(voucher);
             }
 
-            // 3. Nếu đơn chưa trả tiền (PENDING_PAYMENT), chỉ cần nhả kho IMEI
             if (oldStatus == OrderStatus.PENDING_PAYMENT) {
                 List<Imei> lockedImeis = imeiRepository.findByOrder(order);
                 for (Imei imei : lockedImeis) {
@@ -383,13 +451,11 @@ public class OrderServiceImpl implements OrderService {
                 imeiRepository.saveAll(lockedImeis);
             }
 
-            // 4. 🔥 TÍCH HỢP PAYMENT SERVICE: Gọi hoàn tiền tự động qua VNPAY
             if (oldStatus == OrderStatus.PAID && order.getPaymentMethod() == PaymentMethod.VNPAY) {
                 paymentService.refundOrder(order.getId());
             }
         }
 
-        // LOGIC ĐANG GIAO HÀNG
         if (newStatus == OrderStatus.SHIPPED && order.getShipment() != null) {
             order.getShipment().setStatus(ShipmentStatus.DELIVERING);
             shipmentRepository.save(order.getShipment());

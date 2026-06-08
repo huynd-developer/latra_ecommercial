@@ -27,9 +27,28 @@ public class OrderController {
 
     @PostMapping("/checkout-pos")
     @PreAuthorize("hasAnyAuthority('CASHIER', 'MANAGER', 'OWNER')")
-    // 🛠️ ĐÃ SỬA: Kiểu trả về đồng bộ dữ liệu ApiResponse<String> giúp FE dễ bắt kết quả
-    public ResponseEntity<ApiResponse<String>> checkoutPOS(@RequestBody CheckoutRequestDTO request) {
-        String result = orderService.checkoutPOS(request);
+    // 🛠️ ĐÃ SỬA FULL: Trả về Map<String, Object> thay vì String, truyền thêm HttpServletRequest
+    public ResponseEntity<ApiResponse<Map<String, Object>>> checkoutPOS(
+            @RequestBody CheckoutRequestDTO request,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
+
+        // 1. Lưu đơn hàng vào DB và trả về đối tượng Order (Đã sửa ở tầng Service bên dưới)
+        Order order = orderService.checkoutPOS(request);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("orderId", order.getId());
+        result.put("totalAmount", order.getTotalAmount());
+
+        // 2. LOGIC THỰC TẾ: Nếu chọn phương thức VNPay -> Sinh link URL trả về cho FE quét QR
+        if (order.getPaymentMethod() == PaymentMethod.VNPAY) {
+            String paymentUrl = paymentService.createVnPayPaymentUrl(order, httpRequest);
+            result.put("paymentUrl", paymentUrl);
+            result.put("isVnPay", true);
+        } else {
+            result.put("paymentUrl", null);
+            result.put("isVnPay", false);
+        }
+
         return ResponseEntity.ok(ApiResponse.success(result, "Tạo hóa đơn tại quầy thành công!"));
     }
 
