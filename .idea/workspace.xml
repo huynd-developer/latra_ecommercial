@@ -5,51 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="54b316aa-6f0e-4567-9206-b0e474dc3e04" name="Changes" comment="&quot;Update backend&quot;">
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/common/config/AuditConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/common/config/JwtAuthenticationEntryPoint.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/common/config/JwtAuthenticationFilter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/common/config/JwtTokenProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/common/config/SecurityConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/common/response/ErrorResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/auth/controller/AuthController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/auth/dto/AuthResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/auth/dto/LoginRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/auth/dto/RegisterRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/auth/service/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/user/controller/UserController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/user/service/UserService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/user/service/impl/UserServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/LatraApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/LatraApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/common/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/common/exception/GlobalExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/Product.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/base/BaseEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/entity/base/BaseEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/brand/controller/BrandController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/brand/controller/BrandController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/cart/controller/CartController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/cart/controller/CartController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/category/controller/CategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/category/controller/CategoryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/dashboard/controller/DashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/dashboard/controller/DashboardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/dashboard/controller/ShiftController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/dashboard/controller/ShiftController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/inventory/controller/ImeiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/inventory/controller/ImeiController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/inventory/dto/response/ImeiResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/inventory/dto/response/ImeiResponseDTO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/inventory/service/ImeiService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/inventory/service/ImeiService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/inventory/service/impl/ImeiServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/inventory/service/impl/ImeiServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/order/controller/OrderAdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/order/controller/OrderAdminController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/order/controller/OrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/order/controller/OrderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/payment/controller/PaymentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/payment/controller/PaymentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/product/controller/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/product/controller/ProductController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/product/service/ProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/product/service/ProductService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/product/service/impl/ProductServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/product/service/impl/ProductServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/promotion/controller/FlashSaleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/promotion/controller/FlashSaleController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/promotion/controller/PromotionAnalyticsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/promotion/controller/PromotionAnalyticsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/promotion/controller/PublicPromotionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/promotion/controller/PublicPromotionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/order/dto/request/CheckoutRequestDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/order/dto/request/CheckoutRequestDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/order/dto/request/WebCheckoutRequestDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/order/dto/request/WebCheckoutRequestDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/order/service/OrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/order/service/OrderService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/order/service/impl/OrderServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/order/service/impl/OrderServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/promotion/controller/VoucherController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/promotion/controller/VoucherController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/user/controller/CustomerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/user/controller/CustomerController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/user/controller/EmployeeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/user/controller/EmployeeController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/user/service/CustomerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/user/service/CustomerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/user/service/EmployeeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/user/service/EmployeeService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/promotion/service/impl/VoucherServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/modules/promotion/service/impl/VoucherServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/ImeiRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/ImeiRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/ProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/ProductRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/trungdevcode/latra/repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,37 +69,37 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;Spring Boot.LatraApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_directory_selection&quot;: &quot;E:/JavaWeb/LATRA/LATRA/src/main/java/trungdevcode/latra&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/JavaWeb/LATRA/backend/src/main/java/trungdevcode/latra/voucher&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.1.7\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.LatraApplication.executor": "Debug",
+    "git-widget-placeholder": "update-fe",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_directory_selection": "E:/JavaWeb/LATRA/LATRA/src/main/java/trungdevcode/latra",
+    "last_opened_file_path": "E:/JavaWeb/LATRA/backend/src/main/java/trungdevcode/latra/voucher",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "vcs.Subversion",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.1.7\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;sqlserver&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "sqlserver"
     ]
   }
-}</component>
+}]]></component>
   <component name="ReactorSettings">
     <option name="notificationShown" value="true" />
   </component>
@@ -174,6 +145,9 @@
     </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SvnConfiguration">
+    <configuration>C:\Users\huy\AppData\Roaming\Subversion</configuration>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="54b316aa-6f0e-4567-9206-b0e474dc3e04" name="Changes" comment="" />
@@ -262,7 +236,16 @@
       <workItem from="1780233859444" duration="7739000" />
       <workItem from="1780280609079" duration="4359000" />
       <workItem from="1780301102597" duration="6085000" />
-      <workItem from="1780320106422" duration="2214000" />
+      <workItem from="1780320106422" duration="6340000" />
+      <workItem from="1780366958089" duration="2035000" />
+      <workItem from="1780388802978" duration="798000" />
+      <workItem from="1780494315024" duration="7171000" />
+      <workItem from="1780556989830" duration="5198000" />
+      <workItem from="1780584740993" duration="4640000" />
+      <workItem from="1780670324474" duration="3360000" />
+      <workItem from="1780822766031" duration="91000" />
+      <workItem from="1780907996794" duration="2695000" />
+      <workItem from="1780925735746" duration="1428000" />
     </task>
     <task id="LOCAL-00001" summary="&quot;Hoàn thiện API Giỏ hàng và Checkout (Trừ kho chuẩn) - Done 100%&quot;">
       <option name="closed" value="true" />
@@ -360,7 +343,23 @@
       <option name="project" value="LOCAL" />
       <updated>1779354658299</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="&quot;Update backend&quot;">
+      <option name="closed" value="true" />
+      <created>1780323818504</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1780323818504</updated>
+    </task>
+    <task id="LOCAL-00014" summary="&quot;Update backend&quot;">
+      <option name="closed" value="true" />
+      <created>1780323859325</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1780323859325</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

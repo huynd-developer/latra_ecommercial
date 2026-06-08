@@ -20,4 +20,10 @@ public class CheckoutRequestDTO {
     private String paymentMethod;
     private BigDecimal cashAmount;
     private BigDecimal transferAmount;
+
+    // ==========================================
+    // 🔥 THÊM DÒNG NÀY ĐỂ HỨNG MÃ GIẢM GIÁ
+    // ==========================================
+    private String voucherCode;
+
 }

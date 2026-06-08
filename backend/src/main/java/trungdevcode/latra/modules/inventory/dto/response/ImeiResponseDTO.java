@@ -1,4 +1,3 @@
-// backend/src/main/java/trungdevcode/latra/modules/inventory/dto/response/ImeiResponseDTO.java
 package trungdevcode.latra.modules.inventory.dto.response;
 
 import lombok.Builder;
@@ -14,8 +13,10 @@ public class ImeiResponseDTO {
     private String status;
     private LocalDateTime createdAt;
 
-    // Thông tin ăn theo để hiển thị trên bảng
     private String productName;
-    private String variantName; // VD: Trắng - 256GB
+    private String variantName;
     private BigDecimal price;
+
+    // 🔥 THÊM DÒNG NÀY: Để Frontend có link ảnh mà hiển thị
+    private String imageUrl;
 }
